@@ -20,17 +20,17 @@ class server {
         }
 
         cars = new Hashtable<String, String>();
-        byte[] data = new byte[1024];
 
         DatagramSocket serverSocket = new DatagramSocket(port);
 
         boolean done = false;
         while (!done) {
 
+            byte[] data = new byte[1024];
             DatagramPacket packet = new DatagramPacket(data, data.length);
             serverSocket.receive(packet);
             String request = new String(packet.getData(), 0, packet.getLength());
-            System.out.println("Request: " + request);
+            System.out.println("\nRequest: " + request);
 
             char oper = request.charAt(0);
 

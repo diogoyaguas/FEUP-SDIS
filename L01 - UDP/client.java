@@ -38,12 +38,12 @@ public class client {
 
         case "register":
 
-            request += 'R' + plate + ";" + owner;
+            request = 'R' + plate + ";" + owner;
             break;
 
         case "lookup":
 
-            request += 'L' + plate;
+            request = 'L' + plate;
             break;
         }
 
@@ -53,7 +53,8 @@ public class client {
         InetAddress address = InetAddress.getByName(hostName);
         DatagramPacket packet = new DatagramPacket(data, data.length, address, port);
         clientSocket.send(packet);
-        System.out.println("Sent: " + request);
+        clientSocket.setSoTimeout(2000);
+        System.out.println("\nSent: " + request);
 
         packet = new DatagramPacket(data, data.length);
         clientSocket.receive(packet);
