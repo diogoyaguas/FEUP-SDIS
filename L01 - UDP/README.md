@@ -22,8 +22,8 @@ Open a Terminal and send a request to the server:
 **Example:** ```java client localhost 8080 register 20-02-SD Diogo```
 
 To which the server will respond:
-- Size of the database &rarr if the plate was added to the database;
-- -1 &rarr if the plate already exists in the database.
+- Size of the database -> if the plate was added to the database;
+- -1 -> if the plate already exists in the database.
 
 ### Lookup a plate
 
@@ -32,5 +32,5 @@ To which the server will respond:
 **Example:** ```java client localhost 8080 lookup 20-02-SD```
 
 To which the server will respond:
-- Name of plate owner &rarr if the plate was found;
-- NOT_FOUND &rarr if the plate was not found.
+- Name of plate owner -> if the plate was found;
+- NOT_FOUND -> if the plate was not found.
