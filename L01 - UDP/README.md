@@ -17,7 +17,7 @@ Open a Terminal and send a request to the server:
 
 ### Register a plate
 
-**Usage:** java l01.Client \<serverIP\> \<port\> register \<plate\> \<owner\>
+**Usage:** java client \<host_name\> \<port\> register \<plate\> \<owner\>
 
 **Example:** ```java client localhost 8080 register 20-02-SD Diogo```
 
@@ -27,7 +27,7 @@ To which the server will respond:
 
 ### Lookup a plate
 
-**Usage:** java l01.Client \<serverIP\> \<port\> lookup \<plate\>
+**Usage:** java client \<host_name\> \<port\> lookup \<plate\>
 
 **Example:** ```java client localhost 8080 lookup 20-02-SD```
 
