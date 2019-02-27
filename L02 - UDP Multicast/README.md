@@ -1,36 +1,31 @@
-# L01 - UDP
+# L02 - UDP Multicast
 
 ## Server
 
-Open a Terminal and run the server at a chosen port:
+Open a Terminal by pressing <kbd>CTRL</kbd> + <kbd>ALT</kbd> + <kbd>T</kbd>, and start the server.
 
-**Usage:** java server \<port\>
+**Usage:** java server \<srvc_port\> \<mcast_addr\> \<mcast_port\>
 
-**Example:** ```java server 8080```
+**Example:** ```java server 8080 225.0.0 8000```
 
-Press **CTRL+C** to stop the server.
+Press <kbd>CTRL</kbd> + <kbd>C</kbd> to stop the server.
 
 
 ## Client
 
-Open a Terminal and send a request to the server:
+Open a Terminal and send a request to the server.
 
-### Register a plate
+**Usage:** java client \<mcast_addr\> \<mcast_port\> \<oper\> \<opnd\>*
 
-**Usage:** java client \<host_name\> \<port\> register \<plate\> \<owner\>
+### Register
 
-**Example:** ```java client localhost 8080 register 20-02-SD Diogo```
+**Usage:** java client \<mcast_addr\> \<mcast_port\> register \<plate\> \<owner\>
 
-To which the server will respond:
-- Size of the database :arrow_right: if the plate was added to the database;
-- -1 :arrow_right: if the plate already exists in the database.
+**Example:** ```java client 225.0.0.0 8000 register 11-11-AA Diogo```
 
-### Lookup a plate
 
-**Usage:** java client \<host_name\> \<port\> lookup \<plate\>
+### Lookup
 
-**Example:** ```java client localhost 8080 lookup 20-02-SD```
+**Usage:** java client \<mcast_addr\> \<mcast_port\> lookup \<plate\>
 
-To which the server will respond:
-- Name of plate owner :arrow_right: if the plate was found;
-- NOT_FOUND :arrow_right: if the plate was not found.
+**Example:** ```java client 225.0.0.0 8000 lookup 11-11-AA```
