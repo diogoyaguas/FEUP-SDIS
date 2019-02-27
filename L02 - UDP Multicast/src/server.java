@@ -2,23 +2,29 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-class server extends TimerTask  {
+class server extends TimerTask {
 
     private static int srvc_port;
-    private static String srvc_addr = "localhost";   
+    private static String srvc_addr = "localhost";
     private static InetAddress mcast_addr;
     private static int mcast_port;
     private static MulticastSocket mSocket;
     private static Hashtable<String, String> cars;
 
     @Override
-    public static void run(){
+    public void run() {
 
         String msg = srvc_addr + ";" + srvc_port;
 
-        DatagramPacket mcast_packet = new DatagramPacket(msg.getBytes(), msg.length, mcast_addr, mcast_port);
-        mSocket.send(mcast_packet);
+        DatagramPacket mcast_packet = new DatagramPacket(msg.getBytes(), msg.getBytes().length, mcast_addr, mcast_port);
 
+        try {
+            mSocket.send(mcast_packet);
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        }
 
         System.out.println("multicast: " + mcast_addr + " " + mcast_port + ": " + srvc_addr + " " + srvc_port + "\n");
     }
@@ -30,17 +36,15 @@ class server extends TimerTask  {
             System.out.println("Usage:\tjava Server <srvc_port> <mcast_addr> <mcast_port>");
             return;
 
-        } 
-        
-        else if(!isValidRange("224.0.0.0", "239.255.255.255", args[1])) {
-           
-            System.out.println("IP Address Error: Must be in the range 224.0.0.0 to 239.255.255.255\n");
-            return;
         }
 
+        else if (!utils.isValidRange("224.0.0.0", "239.255.255.255", args[1])) {
+
+            System.out.println("IP Address Error: Must be in the range 224.0.0.0 to 239.255.255.255\n");
+            return;
         } else {
             srvc_port = Integer.parseInt(args[0]);
-            mcast_addr = InetAddress.getByName(mcast_addr);
+            mcast_addr = InetAddress.getByName(args[1]);
             mcast_port = Integer.parseInt(args[2]);
         }
 
@@ -50,11 +54,11 @@ class server extends TimerTask  {
         mSocket.setTimeToLive(1);
 
         DatagramSocket serverSocket = new DatagramSocket(srvc_port);
-       
+
         TimerTask timerTask = new server();
 
         Timer timer = new Timer(true);
-        timer.setAtFixedRate(timerTask, 0, 1000);
+        timer.scheduleAtFixedRate(timerTask, 0, 1000);
 
         boolean done = false;
 
