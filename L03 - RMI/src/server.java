@@ -1,7 +1,5 @@
 import java.io.*;
-import java.net.*;
 import java.util.*;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
@@ -18,8 +16,8 @@ class server implements remoteInterface {
 
             System.out.println("Usage:\tjava Server <remote_object_name>");
             return;
-        } 
-        
+        }
+
         else {
 
             rmObjectName = args[0];
@@ -35,15 +33,18 @@ class server implements remoteInterface {
             cars = new Hashtable<String, String>();
 
             System.err.println("Server ready");
+        } catch (Exception e) {
+            System.err.println("Server exception: " + e.toString());
+            e.printStackTrace();
         }
     }
 
-    @Override 
-    public int register(String plate, String onwer) throws RemoteException {
+    @Override
+    public int register(String plate, String owner) throws RemoteException {
 
         int request;
 
-        if(cars.containsKey(plate)) {
+        if (cars.containsKey(plate)) {
 
             request = -1;
         }
@@ -54,18 +55,19 @@ class server implements remoteInterface {
             request = cars.size();
         }
 
-            System.out.println("register " + plate + " " + owner + " :: " + request);
+        System.out.println("register " + plate + " " + owner + " :: " + request);
 
-		return request;
+        return request;
     }
 
-    @Override public String lookup(String plate)  throws RemoteException {
+    @Override
+    public String lookup(String plate) throws RemoteException {
 
         String owner = cars.containsKey(plate) ? cars.get(plate) : "ERROR";
 
-		System.out.println("lookup " + plate + " :: " + owner);
+        System.out.println("lookup " + plate + " :: " + owner);
 
-		return owner;
+        return owner;
     }
 
 }

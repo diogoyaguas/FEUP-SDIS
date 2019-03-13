@@ -1,6 +1,5 @@
 import java.io.*;
-import java.net.*;
-import java.rmi.regristry.LocateRegistry;
+import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
 public class client {
@@ -38,24 +37,24 @@ public class client {
 
             Registry registry = LocateRegistry.getRegistry(hostName);
             remoteInterface stub = (remoteInterface) registry.lookup(rmObjectName);
-    
 
-            switch(oper) {
-                case "lookup":
-                String lookupReq = server.lookup(plate);
+            switch (oper) {
+            case "lookup":
+                String lookupReq = stub.lookup(plate);
                 System.out.println("lookup " + plate + " :: " + lookupReq);
                 break;
 
-                case "register":
-                int registerReq = server.register(plate, owner);
+            case "register":
+                int registerReq = stub.register(plate, owner);
                 System.out.println("register" + plate + " :: " + registerReq);
                 break;
             }
         }
 
-        catch(Exception e) {
+        catch (Exception e) {
             System.err.println("Client exception: " + e.toString());
             e.printStackTrace();
         }
 
+    }
 }
