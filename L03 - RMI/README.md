@@ -1,36 +1,33 @@
-# L01 - UDP
+# L04
 
 ## Server
 
-Open a Terminal and run the server at a chosen port:
+Open a Terminal.
 
-**Usage:** java server \<port\>
+Start the RMI registry: ```start rmiregistry```
+
+**Usage:** java Server \<remote_object_name\>
 
 **Example:** ```java server 8080```
 
-Press **CTRL+C** to stop the server.
+Stop the server.
 
 
 ## Client
+
+**Usage:** java Client \<host_name\> \<remote_object_name\> \<oper\> \<opnd\>*
 
 Open a Terminal and send a request to the server:
 
 ### Register a plate
 
-**Usage:** java client \<host_name\> \<port\> register \<plate\> \<owner\>
+**Usage:** java Client \<host_name\> \<remote_object_name\> register \<plate\> \<owner\>
 
-**Example:** ```java client localhost 8080 register 20-02-SD Diogo```
+**Example:** ```java client localhost 8080 register 11-22-AA Alexa```
 
-To which the server will respond:
-- Size of the database :arrow_right: if the plate was added to the database;
-- -1 :arrow_right: if the plate already exists in the database.
 
 ### Lookup a plate
 
-**Usage:** java client \<host_name\> \<port\> lookup \<plate\>
+**Usage:** java Client \<host_name\> \<remote_object_name\> lookup \<plate\>
 
-**Example:** ```java client localhost 8080 lookup 20-02-SD```
-
-To which the server will respond:
-- Name of plate owner :arrow_right: if the plate was found;
-- NOT_FOUND :arrow_right: if the plate was not found.
+**Example:** ```java l04/Client localhost 8080 lookup 11-22-AA```
