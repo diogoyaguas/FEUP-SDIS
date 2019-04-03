@@ -53,8 +53,7 @@ public class client {
     Socket clientSocket = new Socket(hostName, port);
 
     out = new PrintWriter(clientSocket.getOutputStream(), true);
-    in = new BufferedReader(
-        new InputStreamReader(clientSocket.getInputStream()));
+    in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
     out.println(request);
     System.out.println("\nSent: " + request);
