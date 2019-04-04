@@ -36,8 +36,6 @@ public class Peer {
 
     public static void main(String args[]) throws ClassNotFoundException, IOException {
 
-        System.setProperty("java.net.preferIPv4Stack", "true");
-
         //CHECK & INITIALIZE ARGS
         if(!initializeArgs(String args[]))
             return;
@@ -57,16 +55,10 @@ public class Peer {
             e.printStackTrace();
         }
 
-        deserializeStorage(); // loads storage
-
-        exec.execute(MC);
-        exec.execute(MDB);
-        exec.execute(MDR);
-
-        Runtime.getRuntime().addShutdownHook(new Thread(Peer::serializeStorage)); // Saves storage if CTRL-C is pressed
+        startMulticast();
     }
 
-    private static boolean initializeArgs(String[] args) throws UnknownHostException {
+    private static boolean initializeArgs(String[] args) throws UnknownHostException { 
 
         if(args.length != 3 && args.length != 9){
             System.out.println("Usage:\tPeer <protocolVersion> <serverId> <peerApp> <MCAddress> <MCPort> <MDBAddress> <MDBPort> <MDRAddress> <MDRPort>");
@@ -125,5 +117,28 @@ public class Peer {
     public static ChannelRestore getMDR() { return MDR; }
     public static ChannelControl getMC() { return MC; }
     public static int getServerID() { return serverId; }
+    public static ScheduledThreadPoolExecutor getExec() { return exec; }
+
+    //START MULTICAST
+    private static void startMulticast(){
+
+        exec = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(250);
+        exec.execute(MC);
+        exec.execute(MDB);
+        exec.execute(MDR);
+    }
+
+    //ACTIONS
 
 }
+
+/*
+      System.setProperty("java.net.preferIPv4Stack", "true");
+
+         deserializeStorage(); // loads storage
+
+      
+
+        Runtime.getRuntime().addShutdownHook(new Thread(Peer::serializeStorage)); // Saves storage if CTRL-C is pressed
+
+*/
