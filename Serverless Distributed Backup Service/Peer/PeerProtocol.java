@@ -9,9 +9,7 @@ import java.net.UnknownHostException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class PeerProtocol {
 
@@ -22,22 +20,10 @@ public class PeerProtocol {
     private static InetAddress MCAddress, MDBAddress, MDRAddress;
     private static int MCPort, MDBPort, MDRPort;
 
-    private static final AtomicInteger count = new AtomicInteger(0);
-    private int peerID = 0;
-    private static ChannelControl MC;
-    private static ChannelBackup MDB;
-    private static ChannelRestore MDR;
+    private static Channel MC, MDB, MDR;
     private static ScheduledThreadPoolExecutor exec;
 
-    Peer(InetAddress MCAddress, int MCPort, InetAddress MDBAddress, int MDBPort, InetAddress MDRAddress, int MDRPort) {
-        peerID = count.incrementAndGet();
-        exec = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(250);
-        MC = new ChannelControl(MCAddress, MCPort);
-        MDB = new ChannelBackup(MDBAddress, MDBPort);
-        MDR = new ChannelRestore(MDRAddress, MDRPort);
-    }
-
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         System.setProperty("java.net.preferIPv4Stack", "true");
 
@@ -53,16 +39,12 @@ public class PeerProtocol {
             Registry registry = LocateRegistry.getRegistry();
             registry.bind(peerAp, stub);
 
-            System.err.println("Peer "+ peerAp + " created");
+            System.out.println("OIIIIIIIIIII");
 
         } catch (Exception e) {
             System.err.println("\nPeer exception: " + e.toString());
             e.printStackTrace();
         }
-
-        exec.execute(MC);
-        exec.execute(MDB);
-        exec.execute(MDR);
 
     }
 
@@ -96,6 +78,10 @@ public class PeerProtocol {
         protocolVersion = Double.parseDouble(args[0]);
         serverId = Integer.parseInt(args[1]);
         peerAp = args[2];
+
+        MC = new ChannelControl(MCAddress, MCPort);
+        MDB = new ChannelBackup(MDBAddress, MDBPort);
+        MDR = new ChannelRestore(MDRAddress, MDRPort);
 
         printInfo();
 
