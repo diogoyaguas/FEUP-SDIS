@@ -1,6 +1,6 @@
-package Channel;
+package channel;
 
-import Messages.MessageHandler;
+import messages.MessageHandler;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

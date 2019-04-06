@@ -1,7 +1,7 @@
-package Peer;
+package peer;
 
-import Channel.*;
-import Service.RMI;
+import channel.*;
+import service.RMI;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -120,6 +120,16 @@ public class Peer implements RMI {
 
     @Override
     public void delete(String filepath) throws RemoteException {
+
+    }
+
+    @Override
+    public void reclaim(int size) throws RemoteException {
+
+    }
+
+    @Override
+    public void state() throws RemoteException {
 
     }
 }

@@ -1,7 +1,7 @@
-package Channel;
+package channel;
 
-import Peer.Chunk;
-import Peer.Peer;
+import peer.Chunk;
+import peer.Peer;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
