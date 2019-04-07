@@ -48,7 +48,6 @@ public class Peer implements RMI {
             RMI stub = (RMI) UnicastRemoteObject.exportObject(obj, 0);
 
             // Bind the remote object's stub in the registry
-            java.rmi.registry.LocateRegistry.createRegistry(0);
             Registry registry = LocateRegistry.getRegistry();
             registry.bind(peerAp, stub);
 
@@ -129,6 +128,6 @@ public class Peer implements RMI {
 
     @Override
     public void state() throws RemoteException {
- 
+
     }
 }
