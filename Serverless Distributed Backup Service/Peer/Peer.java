@@ -54,10 +54,11 @@ public class Peer implements RMI {
             RMI stub = (RMI) UnicastRemoteObject.exportObject(obj, 0);
 
             // Bind the remote object's stub in the registry
+            java.rmi.registry.LocateRegistry.createRegistry(1099);
             Registry registry = LocateRegistry.getRegistry();
             registry.bind(peerAp, stub);
 
-            System.err.println("Peer " + peerAp + " ready");
+            System.err.println("\nPeer " + peerAp + " ready");
 
         } catch (Exception e) {
             System.err.println("\nPeer exception: " + e.toString());
