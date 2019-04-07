@@ -1,9 +1,11 @@
 package peer;
 
-import channel.*;
+import channel.Channel;
+import channel.ChannelBackup;
+import channel.ChannelControl;
+import channel.ChannelRestore;
 import service.RMI;
 
-import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.rmi.RemoteException;
@@ -41,7 +43,7 @@ public class Peer implements RMI {
         MDR = new ChannelRestore(MDRAddress, MDRPort);
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
 
         System.setProperty("java.net.preferIPv4Stack", "true");
 
@@ -54,7 +56,7 @@ public class Peer implements RMI {
             RMI stub = (RMI) UnicastRemoteObject.exportObject(obj, 0);
 
             // Bind the remote object's stub in the registry
-            java.rmi.registry.LocateRegistry.createRegistry(1099);
+            java.rmi.registry.LocateRegistry.createRegistry(0);
             Registry registry = LocateRegistry.getRegistry();
             registry.bind(peerAp, stub);
 
@@ -64,6 +66,10 @@ public class Peer implements RMI {
             System.err.println("\nPeer exception: " + e.toString());
             e.printStackTrace();
         }
+
+        exec.execute(MC);
+        exec.execute(MDB);
+        exec.execute(MDR);
 
     }
 

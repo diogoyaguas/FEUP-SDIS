@@ -1,2 +1,8 @@
 
 *.class
+
+Serverless Distributed Backup Service/\.idea/
+
+Serverless Distributed Backup Service/out/production/Serverless Distributed Backup Service/\.idea/
+
+*.iml
