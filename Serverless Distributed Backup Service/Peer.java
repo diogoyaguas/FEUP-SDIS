@@ -1,9 +1,16 @@
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -24,6 +31,8 @@ public class Peer implements RMI {
 
     private static final AtomicInteger count = new AtomicInteger(0);
     private int peerID;
+
+    private static MessageForwarder messageForwarder;
 
 
     private Peer() {
@@ -51,6 +60,10 @@ public class Peer implements RMI {
 
     static ChannelRestore getMDR() {
         return MDR;
+    }
+
+    static MessageForwarder getMessageForwarder(){
+        return messageForwarder;
     }
 
     public static void main(String[] args) {
@@ -113,6 +126,8 @@ public class Peer implements RMI {
         serverId = Integer.parseInt(args[1]);
         peerAp = args[2];
 
+        messageForwarder = new MessageForwarder(protocolVersion);
+
         printInfo();
 
         return true;
@@ -126,6 +141,42 @@ public class Peer implements RMI {
 
     @Override
     public void backup(String filepath, int replicationDegree) throws RemoteException {
+
+        try {
+
+            File file = new File(filepath);
+            byte[] file_data = FileData.loadFile(file);
+            String final_file_id = FileData.getFileId(file);
+
+            // gets number of chunks
+            int chunks_num = file_data.length / (Chunk.getMaxSize()) + 1;
+
+            for (int i = 0; i < chunks_num; i++) {
+
+                // gets chunk data
+                byte[] data;
+
+                if (i == chunks_num - 1) {
+                    if (file_data.length % Chunk.getMaxSize() == 0) {
+                        data = new byte[0];
+                    } else {
+                        data = Arrays.copyOfRange(file_data, i * Chunk.getMaxSize(), i * Chunk.getMaxSize() + (file_data.length % Chunk.getMaxSize()));
+                    }
+                } else {
+                    data = Arrays.copyOfRange(file_data, i * Chunk.getMaxSize(), (i + 1) * Chunk.getMaxSize());
+                }
+
+                // creates chunk
+                Chunk chunk = new Chunk(i, final_file_id, data, replicationDegree);
+
+                // chunk backup
+                chunk.backup();
+
+            }
+
+        } catch (IOException | NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
 
     }
 

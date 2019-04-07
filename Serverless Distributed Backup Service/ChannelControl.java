@@ -2,14 +2,27 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class ChannelControl extends Channel {
+class ChannelControl extends Channel {
 
-    private volatile HashMap<Chunk, ArrayList<Peer>> storedConfirms;
+    private volatile HashMap<String, ArrayList<Peer>> storedConfirms;
 
-    public ChannelControl(InetAddress address, int port) {
+    ChannelControl(InetAddress address, int port) {
         super(address, port);
 
-        storedConfirms = new HashMap<Chunk, ArrayList<Peer>>();
+        storedConfirms = new HashMap<>();
+    }
+
+    synchronized void startSavingStoredConfirmsFor(String chunkID) {
+        if (!storedConfirms.containsKey(chunkID))
+            storedConfirms.put(chunkID, new ArrayList<>());
+    }
+
+    public synchronized int getNumStoredConfirmsFor(String chunkID) {
+        return storedConfirms.get(chunkID).size();
+    }
+
+    public synchronized void stopSavingStoredConfirmsFor(String chunkID) {
+        storedConfirms.remove(chunkID);
     }
 
 }
