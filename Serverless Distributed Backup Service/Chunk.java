@@ -1,5 +1,3 @@
-package peer;
-
 public class Chunk  implements Comparable {
 
     private String  ID, fileID;

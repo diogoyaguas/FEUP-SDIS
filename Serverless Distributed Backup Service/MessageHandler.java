@@ -1,5 +1,3 @@
-package messages;
-
 import java.net.DatagramPacket;
 
 public class MessageHandler implements Runnable {

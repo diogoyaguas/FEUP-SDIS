@@ -3,8 +3,6 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.io.*;
 
-import service.RMI;
-
 public class App {
 
     static RMI stub;

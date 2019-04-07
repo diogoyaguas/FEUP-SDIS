@@ -1,5 +1,3 @@
-package channel;
-
 import java.net.InetAddress;
 
 public class ChannelRestore extends Channel {

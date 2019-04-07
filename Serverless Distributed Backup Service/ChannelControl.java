@@ -1,8 +1,3 @@
-package channel;
-
-import peer.Chunk;
-import peer.Peer;
-
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -1,11 +1,3 @@
-package peer;
-
-import channel.Channel;
-import channel.ChannelBackup;
-import channel.ChannelControl;
-import channel.ChannelRestore;
-import service.RMI;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.rmi.RemoteException;
@@ -137,6 +129,6 @@ public class Peer implements RMI {
 
     @Override
     public void state() throws RemoteException {
-
+ 
     }
 }
