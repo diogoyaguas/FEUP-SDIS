@@ -52,4 +52,14 @@ public abstract class Channel implements Runnable {
         if (socket != null)
             socket.close();
     }
+
+    synchronized void sendMessage(byte[] msg) { // only one thread can access the resource at a given point of time
+        DatagramPacket packet = new DatagramPacket(msg, msg.length, address, port);
+
+        try {
+            socket.send(packet);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

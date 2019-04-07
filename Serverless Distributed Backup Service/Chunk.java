@@ -16,12 +16,12 @@ public class Chunk  implements Comparable {
     }
 
     //GETS
-    public int getChunkNr() { return nr;}
-    public int getRepDegree() { return repDegree;}
-    public int getCurrentRepDegree() { return currentRepDegree;}
-    public byte[] getData() { return data;}
+    int getChunkNr() { return nr;}
+    int getRepDegree() { return repDegree;}
+    private int getCurrentRepDegree() { return currentRepDegree;}
+    byte[] getData() { return data;}
     public String getID() { return ID;}
-    public String getFileID() { return fileID;}
+    String getFileID() { return fileID;}
 
     //SETS
     public void setCurrentRepDegree(int replica) { currentRepDegree = replica;}

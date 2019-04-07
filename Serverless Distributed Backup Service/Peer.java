@@ -17,7 +17,9 @@ public class Peer implements RMI {
     private static InetAddress MCAddress, MDBAddress, MDRAddress;
     private static int MCPort, MDBPort, MDRPort;
 
-    private static Channel MC, MDB, MDR;
+    private static ChannelBackup MDB;
+    private static ChannelControl MC;
+    private static ChannelRestore MDR;
     private static ScheduledThreadPoolExecutor exec;
 
     private static final AtomicInteger count = new AtomicInteger(0);
@@ -33,6 +35,22 @@ public class Peer implements RMI {
         MC = new ChannelControl(MCAddress, MCPort);
         MDB = new ChannelBackup(MDBAddress, MDBPort);
         MDR = new ChannelRestore(MDRAddress, MDRPort);
+    }
+
+    static int getServerId() {
+        return serverId;
+    }
+
+    static ChannelControl getMC() {
+        return MC;
+    }
+
+    static ChannelBackup getMDB() {
+        return MDB;
+    }
+
+    static ChannelRestore getMDR() {
+        return MDR;
     }
 
     public static void main(String[] args) {
