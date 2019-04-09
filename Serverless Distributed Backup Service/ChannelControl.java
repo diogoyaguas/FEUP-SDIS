@@ -17,12 +17,12 @@ class ChannelControl extends Channel {
             stored.put(chunkID, new ArrayList<>());
     }
 
-    public synchronized int getNumStoredConfirmsFor(String chunkID) {
-        return stored.get(chunkID).size();
+    synchronized int getNumStoredConfirmsFor(String chunkID) {
+        return storedConfirms.get(chunkID).size();
     }
 
-    public synchronized void stopSavingStoredConfirmsFor(String chunkID) {
-        stored.remove(chunkID);
+    synchronized void stopSavingStoredConfirmsFor(String chunkID) {
+        storedConfirms.remove(chunkID);
     }
 
 };
