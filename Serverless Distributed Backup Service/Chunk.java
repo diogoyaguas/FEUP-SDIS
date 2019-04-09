@@ -79,9 +79,7 @@ public class Chunk implements Comparable {
 
         } while (stored < this.repDegree && putchunk_sent != 5);
 
-
         Peer.getMC().stopSavingStoredConfirmsFor(this.ID);
-
     }
 
     @Override

@@ -3,7 +3,7 @@ public class MessageForwarder {
 
     private static byte CR = 0xD;
     private static byte LF = 0xA;
-    private static String CRLF = (char) CR + "" + (char) LF;
+    public static String CRLF = (char) CR + "" + (char) LF;
 
     public MessageForwarder(double protocolVersion) {
         this.protocolVersion = protocolVersion;
