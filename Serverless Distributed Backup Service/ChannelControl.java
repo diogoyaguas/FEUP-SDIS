@@ -1,15 +1,16 @@
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 class ChannelControl extends Channel {
 
-    private volatile HashMap<String, ArrayList<Integer>> stored;
+    private volatile ConcurrentHashMap<String, ArrayList<Integer>> stored;
 
     ChannelControl(InetAddress address, int port) {
         super(address, port);
 
-        stored = new HashMap<>();
+        stored = new ConcurrentHashMap<>();
     }
 
     synchronized void startSavingStoredConfirmsFor(String chunkID) {
@@ -24,5 +25,10 @@ class ChannelControl extends Channel {
     synchronized void stopSavingStoredConfirmsFor(String chunkID) {
         stored.remove(chunkID);
     }
+
+    public void save(String chunkId, int serverId) {
+
+    }
+
 
 };

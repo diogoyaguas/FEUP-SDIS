@@ -135,6 +135,8 @@ public class Peer implements RMI {
     @Override
     public void backup(String filepath, int replicationDegree) throws RemoteException {
 
+        File backupFolder = FileData.createFolder(peerFolder.getName() + "/backup");
+
         try {
 
             File file = new File(filepath);
@@ -170,7 +172,6 @@ public class Peer implements RMI {
         } catch (IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
-
     }
 
     @Override
