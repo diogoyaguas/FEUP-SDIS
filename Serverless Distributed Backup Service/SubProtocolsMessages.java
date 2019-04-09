@@ -17,8 +17,7 @@ public class SubProtocolsMessages {
     //SAVE
 
 
-    //not sure this is right
-    Storage.addStoredChunk(chunk);
+    Peer.getStorage().addStoredChunk(chunk);
 
     Peer.getMC().startSavingStoredConfirmsFor(chunk.getID());
 
@@ -45,7 +44,7 @@ public class SubProtocolsMessages {
      //SAVE
     Peer.getMC();
 
-    if(Storage.isStoredAlready(chunk))
+    if(Peer.getStorage().isStoredAlready(chunk))
      //INCREASE REP DEGREE
 
     }

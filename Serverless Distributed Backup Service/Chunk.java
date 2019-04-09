@@ -22,27 +22,21 @@ public class Chunk implements Comparable {
     int getChunkNr() {
         return nr;
     }
-
     int getRepDegree() {
         return repDegree;
     }
-
     private int getCurrentRepDegree() {
         return currentRepDegree;
     }
-
     byte[] getData() {
         return data;
     }
-
     public String getID() {
         return ID;
     }
-
     static int getMaxSize() {
         return MAX_SIZE;
     }
-
     String getFileID() {
         return fileID;
     }
@@ -51,7 +45,6 @@ public class Chunk implements Comparable {
     public void setCurrentRepDegree(int replica) {
         currentRepDegree = replica;
     }
-
     public void setRepDegree(int replications) {
         repDegree = replications;
     }

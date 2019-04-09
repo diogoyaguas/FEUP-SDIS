@@ -39,8 +39,6 @@ public class MessageHandler implements Runnable {
         if(serverID == Peer.getServerId())
         return;
 
-        //PARSE BODY
-
         switch(subProtocol) {
             case "PUTCHUNK":
             chunkNr = Integer.parseInt(parsedHeader[4]);
@@ -77,6 +75,7 @@ public class MessageHandler implements Runnable {
 
     }
 
+    //PARSE MESSAGE
     public String[] parseHeader(DatagramPacket packet) {
 
         String header = " ";
@@ -95,7 +94,6 @@ public class MessageHandler implements Runnable {
 
         return header.split(" ");
     }
-
     public static byte[] parseBody(DatagramPacket packet) {
 
         ByteArrayInputStream input = new ByteArrayInputStream(packet.getData());
