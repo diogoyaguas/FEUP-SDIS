@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 class ChannelControl extends Channel {
 
-    private volatile HashMap<String, ArrayList<Peer>> stored;
+    private volatile HashMap<String, ArrayList<Integer>> stored;
 
     ChannelControl(InetAddress address, int port) {
         super(address, port);
@@ -18,11 +18,11 @@ class ChannelControl extends Channel {
     }
 
     synchronized int getNumStoredConfirmsFor(String chunkID) {
-        return storedConfirms.get(chunkID).size();
+        return stored.get(chunkID).size();
     }
 
     synchronized void stopSavingStoredConfirmsFor(String chunkID) {
-        storedConfirms.remove(chunkID);
+        stored.remove(chunkID);
     }
 
 };

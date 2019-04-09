@@ -97,7 +97,7 @@ public class Peer implements RMI {
     private static boolean initializeArgs(String[] args) throws UnknownHostException {
 
         if (args.length != 3 && args.length != 9) {
-            System.out.println("Usage:\tPeer <protocolVersion> <serverId> <peerApp> <MCAddress> <MCPort> <MDBAddress> <MDBPort> <MDRAddress> <MDRPort>\nUsage:\tPeer <protocolVersion> <serverId> <peerApp>");
+            System.out.println("Usage:\tPeer <protocolVersion> <serverId> <peerApp> <MCAddress> <MCPort> <MDBAddress> <MDBPort> <MDRAddress> <MDRPort>\n      \tPeer <protocolVersion> <serverId> <peerApp>");
             return false;
         } else if (args.length == 3) { //User didn't specify so we use default values
 

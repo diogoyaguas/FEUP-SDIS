@@ -62,7 +62,4 @@ public abstract class Channel implements Runnable {
             e.printStackTrace();
         }
     }
-
-    //save?
-
 }

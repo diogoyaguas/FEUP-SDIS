@@ -10,6 +10,7 @@ public class SubProtocolsMessages {
     //IF ERROR - MAYBE NOT STATIC?
    public static void putchunk(String FileId, int ChunkNo, int ReplicationDeg, byte[] Body) {
     //PUTCHUNK <Version> <SenderId> <FileId> <ChunkNo> <ReplicationDeg> <CRLF><CRLF><Body>
+
     System.out.println("PUTCHUNK RECEIVED\t");
 
     Chunk chunk = new Chunk(ChunkNo, FileId, Body, ReplicationDeg);
@@ -46,6 +47,7 @@ public class SubProtocolsMessages {
 
     if(Peer.getStorage().isStoredAlready(chunk))
      //INCREASE REP DEGREE
+     Peer.getStorage().increaseRepDegree(FileId, ChunkNo);
 
     }
     
