@@ -58,13 +58,13 @@ public class App {
 
         if(args.length != 2 &&  args.length != 3 && args.length != 4){
            
-            System.out.println("Usage:\tApp <peerAccessPoint> <subProtocol> \n");
-            System.out.println("Subprotocols :\n");
-            System.out.println("BACKUP <fileID> <replicationDegree>\t");
-            System.out.println("RESTORE <fileID>\t");
-            System.out.println("DELETE <fileID>\t");
-            System.out.println("RECLAIM <fileID> <space>\t");
-            System.out.println("STATE\n");
+            System.out.println("\n Usage:\tApp <peerAccessPoint> <subProtocol> \n");
+            System.out.println(" Subprotocols :\t");
+            System.out.println(" - BACKUP <fileID> <replicationDegree>\t");
+            System.out.println(" - RESTORE <fileID>\t");
+            System.out.println(" - DELETE <fileID>\t");
+            System.out.println(" - RECLAIM <fileID> <space>\t");
+            System.out.println(" - STATE\n");
             return false;
         }
 

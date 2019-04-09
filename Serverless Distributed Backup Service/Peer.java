@@ -32,12 +32,15 @@ public class Peer implements RMI {
 
     private static final AtomicInteger count = new AtomicInteger(0);
     private int peerID;
+    private File peerFolder;
 
     private static MessageForwarder messageForwarder;
 
 
     private Peer() {
         peerID = count.incrementAndGet();
+
+        peerFolder = FileData.createFolder(peerAp);
 
         exec = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(250);
 
@@ -48,21 +51,11 @@ public class Peer implements RMI {
     }
 
     //GETS
-    static int getServerId() {
-        return serverId;
-    }
-    static ChannelControl getMC() {
-        return MC;
-    }
-    static ChannelBackup getMDB() {
-        return MDB;
-    }
-    static ChannelRestore getMDR() {
-        return MDR;
-    }
-    static MessageForwarder getMessageForwarder(){
-        return messageForwarder;
-    }
+    static int getServerId() { return serverId; }
+    static ChannelControl getMC() { return MC; }
+    static ChannelBackup getMDB() { return MDB; }
+    static ChannelRestore getMDR() { return MDR; }
+    static MessageForwarder getMessageForwarder(){ return messageForwarder; }
     static Storage getStorage() { return storage;}
 
     public static void main(String[] args) {
@@ -97,7 +90,7 @@ public class Peer implements RMI {
     private static boolean initializeArgs(String[] args) throws UnknownHostException {
 
         if (args.length != 3 && args.length != 9) {
-            System.out.println("Usage:\tPeer <protocolVersion> <serverId> <peerApp> <MCAddress> <MCPort> <MDBAddress> <MDBPort> <MDRAddress> <MDRPort>\n      \tPeer <protocolVersion> <serverId> <peerApp>");
+            System.out.println("\n Usage:\tPeer <protocolVersion> <serverId> <peerApp> <MCAddress> <MCPort> <MDBAddress> <MDBPort> <MDRAddress> <MDRPort>\n      \tPeer <protocolVersion> <serverId> <peerApp>");
             return false;
         } else if (args.length == 3) { //User didn't specify so we use default values
 
@@ -135,8 +128,8 @@ public class Peer implements RMI {
 
     private static void printInfo() {
 
-        System.out.println("\nVersion : " + protocolVersion + "\nServerId : " + serverId + "\nAccess Point : " + peerAp);
-        System.out.println("\nMC: " + MCAddress + " | " + MCPort + "\nMDB: " + MDBAddress + " | " + MDBPort + "\nMDR: " + MDRAddress + " | " + MDRPort);
+        System.out.println("\n Version - " + protocolVersion + " | ServerId - " + serverId + " | Access Point - " + peerAp);
+        System.out.println(" MC  " + MCAddress + ":" + MCPort + " | MDB  " + MDBAddress + ":" + MDBPort + " | MDR  " + MDRAddress + ":" + MDRPort);
     }
 
     @Override

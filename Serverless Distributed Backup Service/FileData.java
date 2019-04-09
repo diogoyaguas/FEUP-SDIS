@@ -18,7 +18,6 @@ class FileData {
         return file_data;
     }
 
-
     static String getFileId(File file) throws NoSuchAlgorithmException {
 
         String file_id = file.getName() + file.lastModified() + Peer.getServerId();
@@ -37,5 +36,29 @@ class FileData {
 
         return new String(hexChars);
 
+    }
+
+    static File createFolder(String peerAp) {
+
+        File theDir = new File("Files/" + peerAp);
+
+        // if the directory does not exist, create it
+        if (!theDir.exists()) {
+            System.out.println("\nCreating Folder " + theDir.getName() + " ...");
+            boolean result = false;
+
+            try{
+                theDir.mkdir();
+                result = true;
+            }
+            catch(SecurityException se){
+                System.out.println("\nError creating Peer Folder");
+            }
+            if(result) {
+                System.out.println("Folder created!");
+            }
+        }
+
+        return theDir;
     }
 }
