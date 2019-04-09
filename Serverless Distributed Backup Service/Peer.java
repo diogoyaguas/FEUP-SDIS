@@ -1,14 +1,11 @@
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.concurrent.Executors;
@@ -51,12 +48,33 @@ public class Peer implements RMI {
     }
 
     //GETS
-    static int getServerId() { return serverId; }
-    static ChannelControl getMC() { return MC; }
-    static ChannelBackup getMDB() { return MDB; }
-    static ChannelRestore getMDR() { return MDR; }
-    static MessageForwarder getMessageForwarder(){ return messageForwarder; }
-    static Storage getStorage() { return storage;}
+    static int getServerId() {
+        return serverId;
+    }
+
+    public int getPeerID() {
+        return peerID;
+    }
+
+    static ChannelControl getMC() {
+        return MC;
+    }
+
+    static ChannelBackup getMDB() {
+        return MDB;
+    }
+
+    static ChannelRestore getMDR() {
+        return MDR;
+    }
+
+    static MessageForwarder getMessageForwarder() {
+        return messageForwarder;
+    }
+
+    static Storage getStorage() {
+        return storage;
+    }
 
     public static void main(String[] args) {
 
@@ -193,4 +211,5 @@ public class Peer implements RMI {
     public void state() throws RemoteException {
 
     }
+
 }

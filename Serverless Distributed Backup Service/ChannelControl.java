@@ -1,6 +1,5 @@
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 class ChannelControl extends Channel {
@@ -31,4 +30,4 @@ class ChannelControl extends Channel {
     }
 
 
-};
+}

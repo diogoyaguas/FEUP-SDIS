@@ -3,9 +3,9 @@ public class MessageForwarder {
 
     private static byte CR = 0xD;
     private static byte LF = 0xA;
-    public static String CRLF = (char) CR + "" + (char) LF;
+    static String CRLF = (char) CR + "" + (char) LF;
 
-    public MessageForwarder(double protocolVersion) {
+    MessageForwarder(double protocolVersion) {
         this.protocolVersion = protocolVersion;
     }
 
@@ -20,7 +20,7 @@ public class MessageForwarder {
 
     // The initiator-peer sends to the MDB
     // multicast data channel a message
-    public void sendPutChunk(Chunk chunk) {
+    void sendPutChunk(Chunk chunk) {
         String header = "PUTCHUNK" + " " + protocolVersion + " " + Peer.getServerId() + " " + chunk.getFileID()
                 + " " + chunk.getChunkNr() + " " + chunk.getRepDegree() + " " + CRLF + CRLF;
 
@@ -30,7 +30,7 @@ public class MessageForwarder {
     }
 
     // Reply by sending on the MC a confirmation message
-    public void sendStored(Chunk chunk) {
+    void sendStored(Chunk chunk) {
         String header = "STORED" + " " + protocolVersion + " " + Peer.getServerId() + " " + chunk.getFileID()
                 + " " + chunk.getChunkNr() + " " + CRLF + CRLF;
 

@@ -5,13 +5,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Storage implements java.io.Serializable {
 
-    private ArrayList<FileData>  files;
+    private ArrayList<FileData> files;
     private ArrayList<Chunk> storedChunks;
     private ArrayList<Chunk> receivedChunks;
     private ConcurrentHashMap<String, Integer> storedReps;
     private ConcurrentHashMap<String, String> wantedChunks;
     private int spaceAvailable;
-    public int MAX_SPACE = 1000000000;
+    private int MAX_SPACE = 1000000000;
 
     public Storage() {
         this.files = new ArrayList<>();
@@ -23,39 +23,71 @@ public class Storage implements java.io.Serializable {
     }
 
     //GETS
-    public ArrayList<FileData> getFiles() { return files;}
-    public ArrayList<Chunk> getStoredChunks() { return storedChunks; }
-    public ArrayList<Chunk> getReceivedChunks() { return receivedChunks; }
-    public ConcurrentHashMap<String, Integer> getStoredReps() {  return storedReps; }
-    public ConcurrentHashMap<String, String> getWantedChunks() { return wantedChunks; }
-    public int getSpaceAvailable() { return spaceAvailable; }
-    public int getOccupiedSpace() { return MAX_SPACE - getSpaceAvailable();}
+    public ArrayList<FileData> getFiles() {
+        return files;
+    }
+
+    public ArrayList<Chunk> getStoredChunks() {
+        return storedChunks;
+    }
+
+    public ArrayList<Chunk> getReceivedChunks() {
+        return receivedChunks;
+    }
+
+    public ConcurrentHashMap<String, Integer> getStoredReps() {
+        return storedReps;
+    }
+
+    public ConcurrentHashMap<String, String> getWantedChunks() {
+        return wantedChunks;
+    }
+
+    private int getSpaceAvailable() {
+        return spaceAvailable;
+    }
+
+    public int getOccupiedSpace() {
+        return MAX_SPACE - getSpaceAvailable();
+    }
 
     //SETS
-    public synchronized void setSpaceAvailable(int spaceAvailable) { this.spaceAvailable = spaceAvailable; }
-    public void setWantedChunkReceived(String FileId, int ChunkNr){ this.wantedChunks.put(FileId + '_' + ChunkNr, "true");}
-    public void setStoredChunkRepDegree(){
+    public synchronized void setSpaceAvailable(int spaceAvailable) {
+        this.spaceAvailable = spaceAvailable;
+    }
 
-        for(Chunk stored : this.storedChunks){
+    public void setWantedChunkReceived(String FileId, int ChunkNr) {
+        this.wantedChunks.put(FileId + '_' + ChunkNr, "true");
+    }
+
+    public void setStoredChunkRepDegree() {
+
+        for (Chunk stored : this.storedChunks) {
             String key = stored.getFileID() + "_" + stored.getChunkNr();
             stored.setCurrentRepDegree(this.storedReps.get(key));
         }
     }
 
     //ADDS
-    public void addFile(FileData file) { this.files.add(file);}
-    public void addWantedChunk(String FileId, int ChunkNr) {this.wantedChunks.put(FileId + '_' + ChunkNr, "false");}
+    public void addFile(FileData file) {
+        this.files.add(file);
+    }
+
+    public void addWantedChunk(String FileId, int ChunkNr) {
+        this.wantedChunks.put(FileId + '_' + ChunkNr, "false");
+    }
 
     //Makes sure the added chunk isn't already there and adds it
-    public synchronized void addStoredChunk(Chunk chunk) {
+    synchronized void addStoredChunk(Chunk chunk) {
 
-        if(!isStoredAlready(chunk))
-        this.storedChunks.add(chunk);
+        if (!isStoredAlready(chunk))
+            this.storedChunks.add(chunk);
     }
-    public boolean isStoredAlready(Chunk chunk){
 
-        for(Chunk stored : this.storedChunks){
-            if(stored.getFileID().equals(chunk.getFileID()) && stored.getChunkNr() == chunk.getChunkNr())
+    boolean isStoredAlready(Chunk chunk) {
+
+        for (Chunk stored : this.storedChunks) {
+            if (stored.getFileID().equals(chunk.getFileID()) && stored.getChunkNr() == chunk.getChunkNr())
                 return true;
         }
 
@@ -66,11 +98,11 @@ public class Storage implements java.io.Serializable {
     public void deleteStoredChunk(String FileId) {
 
         //if there is an error, maybe here - tentei inovar
-        for(Iterator<Chunk> it = this.storedChunks.iterator(); it.hasNext();){
+        for (Iterator<Chunk> it = this.storedChunks.iterator(); it.hasNext(); ) {
 
             Chunk stored = it.next();
 
-            if(stored.getFileID().equals(FileId)) {
+            if (stored.getFileID().equals(FileId)) {
                 String fileName = Peer.getServerId() + "/" + FileId + "_" + stored.getChunkNr();
                 File file = new File(fileName);
                 file.delete();
@@ -85,25 +117,32 @@ public class Storage implements java.io.Serializable {
             }
         }
     }
-    public synchronized void deleteReps(String FileId, int ChunkNr){ this.storedReps.remove(FileId + '_' + ChunkNr);}
+
+    private synchronized void deleteReps(String FileId, int ChunkNr) {
+        this.storedReps.remove(FileId + '_' + ChunkNr);
+    }
 
     //INCREASE & DECREASE SPACE
-    public synchronized void decreaseSpace(int ChunkSize){ spaceAvailable -= ChunkSize;}
-    public synchronized void freeSpace(String FileId, int ChunkNr) {
+    public synchronized void decreaseSpace(int ChunkSize) {
+        spaceAvailable -= ChunkSize;
+    }
 
-        for(Chunk stored : this.storedChunks){
-            if(stored.getFileID().equals(FileId) && stored.getChunkNr() == ChunkNr)
+    private synchronized void freeSpace(String FileId, int ChunkNr) {
+
+        for (Chunk stored : this.storedChunks) {
+            if (stored.getFileID().equals(FileId) && stored.getChunkNr() == ChunkNr)
                 spaceAvailable += stored.getData().length;
         }
     }
 
     //DECREASE & INCREASE REP DEGREE
-    public synchronized void decreaseRepDegree(String FileId, int ChunkNr){
+    public synchronized void decreaseRepDegree(String FileId, int ChunkNr) {
         String key = FileId + '_' + ChunkNr;
-        int total = this.storedReps.get(key) -1;
+        int total = this.storedReps.get(key) - 1;
         this.storedReps.replace(key, total);
     }
-    public synchronized void increaseRepDegree(String FileId, int ChunkNr){
+
+    synchronized void increaseRepDegree(String FileId, int ChunkNr) {
         String key = FileId + '_' + ChunkNr;
         int total = this.storedReps.get(key) + 1;
         this.storedReps.replace(key, total);

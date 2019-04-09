@@ -1,84 +1,78 @@
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.util.ArrayList;
 import java.util.Random;
 
-public class SubProtocolsMessages {
+class SubProtocolsMessages {
 
     //IF ERROR - MAYBE NOT STATIC?
-   public static void putchunk(String FileId, int ChunkNo, int ReplicationDeg, byte[] Body) {
-    //PUTCHUNK <Version> <SenderId> <FileId> <ChunkNo> <ReplicationDeg> <CRLF><CRLF><Body>
+    static void putchunk(String FileId, int ChunkNo, int ReplicationDeg, byte[] Body) {
+        //PUTCHUNK <Version> <SenderId> <FileId> <ChunkNo> <ReplicationDeg> <CRLF><CRLF><Body>
 
-    System.out.println("PUTCHUNK RECEIVED\t");
+        System.out.println("PUTCHUNK RECEIVED\t");
 
-    Chunk chunk = new Chunk(ChunkNo, FileId, Body, ReplicationDeg);
+        Chunk chunk = new Chunk(ChunkNo, FileId, Body, ReplicationDeg);
 
-    //SAVE
+        //SAVE
 
 
-    Peer.getStorage().addStoredChunk(chunk);
+        Peer.getStorage().addStoredChunk(chunk);
 
-    Peer.getMC().startSavingStoredConfirmsFor(chunk.getID());
+        Peer.getMC().startSavingStoredConfirmsFor(chunk.getID());
 
-    Random rand = new Random();
-    int n = rand.nextInt(400) + 1;
+        Random rand = new Random();
+        int n = rand.nextInt(400) + 1;
 
-    try{
-        Thread.sleep(n);
-    } catch(InterruptedException e){
-        e.printStackTrace();
-    }
+        try {
+            Thread.sleep(n);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-    Peer.getMessageForwarder().sendStored(chunk);
-    
-    }
-          
-    public static void stored(int senderId, String FileId, int ChunkNo){
-    //STORED <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
-    System.out.println("STORED RECEIVED\t");
-
-    String chunkId = ChunkNo + "_" + FileId;
-    Chunk chunk = new Chunk(ChunkNo, FileId, new byte[0], 0);
-
-     //SAVE
-    Peer.getMC();
-
-    if(Peer.getStorage().isStoredAlready(chunk))
-     //INCREASE REP DEGREE
-     Peer.getStorage().increaseRepDegree(FileId, ChunkNo);
+        Peer.getMessageForwarder().sendStored(chunk);
 
     }
-    
-    public static void delete(){
-    //DELETE <Version> <SenderId> <FileId> <CRLF><CRLF>
 
-    System.out.println("DELETE RECEIVED\t");
-        
+    static void stored(int senderId, String FileId, int ChunkNo) {
+        //STORED <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
+        System.out.println("STORED RECEIVED\t");
+
+        String chunkId = ChunkNo + "_" + FileId;
+        Chunk chunk = new Chunk(ChunkNo, FileId, new byte[0], 0);
+
+        //SAVE
+        Peer.getMC();
+
+        if (Peer.getStorage().isStoredAlready(chunk))
+            //INCREASE REP DEGREE
+            Peer.getStorage().increaseRepDegree(FileId, ChunkNo);
+
     }
 
-    public static void removed(){
-    //REMOVED <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
-    
-    System.out.println("REMOVED RECEIVED\t");
-    
+    static void delete() {
+        //DELETE <Version> <SenderId> <FileId> <CRLF><CRLF>
+
+        System.out.println("DELETE RECEIVED\t");
+
+    }
+
+    static void removed() {
+        //REMOVED <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
+
+        System.out.println("REMOVED RECEIVED\t");
+
     }
 
     //R E S T O R E
-    public static void getchunk(){
-    //GETCHUNK <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
-        
-    System.out.println("GETCHUNK RECEIVED\t");
-    
+    static void getchunk() {
+        //GETCHUNK <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
+
+        System.out.println("GETCHUNK RECEIVED\t");
+
     }
 
-    public static void chunk(String FileId, int ChunkNo, int repDegree, byte[] Body){
-    //CHUNK <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF><Body>
-        
-    System.out.println("CHUNK RECEIVED\t");
+    static void chunk(String FileId, int ChunkNo, int repDegree, byte[] Body) {
+        //CHUNK <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF><Body>
+
+        System.out.println("CHUNK RECEIVED\t");
 
 
-        
     }
 };

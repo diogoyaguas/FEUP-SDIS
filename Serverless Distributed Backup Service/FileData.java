@@ -47,14 +47,13 @@ class FileData {
             System.out.println("\nCreating Folder " + theDir.getName() + " ...");
             boolean result = false;
 
-            try{
+            try {
                 theDir.mkdir();
                 result = true;
-            }
-            catch(SecurityException se){
+            } catch (SecurityException se) {
                 System.out.println("\nError creating Peer Folder");
             }
-            if(result) {
+            if (result) {
                 System.out.println("Folder created!");
             }
         }

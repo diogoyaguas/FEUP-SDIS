@@ -1,16 +1,7 @@
-import java.net.DatagramPacket;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Random;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.net.DatagramPacket;
 import java.util.Arrays;
 
 
@@ -18,12 +9,12 @@ import java.util.Arrays;
 
 public class MessageHandler implements Runnable {
 
-    DatagramPacket packet;
-    static String[] parsedHeader;
-    static byte[] body;
-    int chunkNr, repDegree ;
+    private DatagramPacket packet;
+    private static String[] parsedHeader;
+    private static byte[] body;
+    private int chunkNr, repDegree ;
    
-    public MessageHandler(DatagramPacket packet){
+    MessageHandler(DatagramPacket packet){
         this.packet = packet;
     }
 
@@ -76,7 +67,7 @@ public class MessageHandler implements Runnable {
     }
 
     //PARSE MESSAGE
-    public String[] parseHeader(DatagramPacket packet) {
+    private String[] parseHeader(DatagramPacket packet) {
 
         String header = " ";
 
@@ -94,7 +85,7 @@ public class MessageHandler implements Runnable {
 
         return header.split(" ");
     }
-    public static byte[] parseBody(DatagramPacket packet) {
+    private static byte[] parseBody(DatagramPacket packet) {
 
         ByteArrayInputStream input = new ByteArrayInputStream(packet.getData());
 		BufferedReader output = new BufferedReader(new InputStreamReader(input));
