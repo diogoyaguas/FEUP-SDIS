@@ -46,10 +46,11 @@ class SubProtocolsMessages {
 
     }
 
-    static void delete() {
+    static void delete(String fileId) {
         //DELETE <Version> <SenderId> <FileId> <CRLF><CRLF>
-
         System.out.println("DELETE RECEIVED\t");
+
+        Peer.getStorage().deleteStoredChunk(fileId);
 
     }
 

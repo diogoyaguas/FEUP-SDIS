@@ -96,8 +96,11 @@ public class Storage implements java.io.Serializable {
             return;
         }
 
-        if (!isStoredAlready(chunk))
+        if (!isStoredAlready(chunk)) {
             this.storedChunks.add(chunk);
+            String key = chunk.getFileID() + '_' + chunk.getChunkNr();
+            this.storedReps.put(key, chunk.getRepDegree());
+        }
 
     }
 
@@ -114,13 +117,16 @@ public class Storage implements java.io.Serializable {
     //DELETES
     public void deleteStoredChunk(String FileId) {
 
-        //if there is an error, maybe here - tentei inovar
+        System.out.println(FileId);
+        System.out.println(this.storedChunks.toString());
+
         for (Iterator<Chunk> it = this.storedChunks.iterator(); it.hasNext(); ) {
 
             Chunk stored = it.next();
 
             if (stored.getFileID().equals(FileId)) {
-                String fileName = Peer.getServerId() + "/" + FileId + "_" + stored.getChunkNr();
+                String fileName = Peer.getPeerFolder().getAbsolutePath() + "/backup/" + FileId + "_" + stored.getChunkNr();
+                System.out.println(fileName);
                 File file = new File(fileName);
                 file.delete();
 
@@ -161,7 +167,6 @@ public class Storage implements java.io.Serializable {
 
     synchronized void increaseRepDegree(String FileId, int ChunkNr) {
         String key = FileId + '_' + ChunkNr;
-        System.out.println(key);
         int total = this.storedReps.get(key) + 1;
         this.storedReps.replace(key, total);
     }

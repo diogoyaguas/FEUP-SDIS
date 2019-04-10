@@ -42,7 +42,7 @@ public class MessageHandler implements Runnable {
                 break;
 
             case "DELETE":
-                SubProtocolsMessages.delete();
+                SubProtocolsMessages.delete(fileId);
                 break;
 
             case "GETCHUNK":
