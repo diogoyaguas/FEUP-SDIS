@@ -117,16 +117,12 @@ public class Storage implements java.io.Serializable {
     //DELETES
     public void deleteStoredChunk(String FileId) {
 
-        System.out.println(FileId);
-        System.out.println(this.storedChunks.toString());
-
         for (Iterator<Chunk> it = this.storedChunks.iterator(); it.hasNext(); ) {
 
             Chunk stored = it.next();
 
             if (stored.getFileID().equals(FileId)) {
-                String fileName = Peer.getPeerFolder().getAbsolutePath() + "/backup/" + FileId + "_" + stored.getChunkNr();
-                System.out.println(fileName);
+                String fileName = Peer.getPeerFolder().getAbsolutePath() + "/backup/" + FileId + "/chk" + stored.getChunkNr();
                 File file = new File(fileName);
                 file.delete();
 
@@ -139,6 +135,11 @@ public class Storage implements java.io.Serializable {
                 it.remove();
             }
         }
+
+        String folderName = Peer.getPeerFolder().getAbsolutePath() + "/backup/" + FileId;
+        File folder = new File(folderName);
+        folder.delete();
+
     }
 
     private synchronized void deleteReps(String FileId, int ChunkNr) {

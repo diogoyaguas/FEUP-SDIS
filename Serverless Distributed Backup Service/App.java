@@ -28,11 +28,12 @@ public class App {
                     break;
 
                 case "RESTORE":
-                    stub.restore(filePath);
+                    stub.restore("TestFiles/" + filePath);
                     break;
 
                 case "DELETE":
-                    stub.delete(filePath);
+                    stub.delete("TestFiles/" + filePath);
+                    System.out.println("\n" + filePath + "deleted\n");
                     break;
 
                 case "RECLAIM":

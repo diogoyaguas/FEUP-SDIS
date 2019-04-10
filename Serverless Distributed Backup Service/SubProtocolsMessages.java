@@ -48,7 +48,7 @@ class SubProtocolsMessages {
 
     static void delete(String fileId) {
         //DELETE <Version> <SenderId> <FileId> <CRLF><CRLF>
-        System.out.println("DELETE RECEIVED\t");
+        System.out.println("\nDELETE RECEIVED\t");
 
         Peer.getStorage().deleteStoredChunk(fileId);
 

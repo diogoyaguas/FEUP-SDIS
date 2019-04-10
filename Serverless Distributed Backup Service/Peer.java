@@ -204,8 +204,8 @@ public class Peer implements RMI {
     @Override
     public void delete(String filepath) throws RemoteException {
 
-        String file_id = "";
         File file = new File(filepath);
+        String file_id = "";
 
         try {
             file_id = FileData.getFileId(file);
