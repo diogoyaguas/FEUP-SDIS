@@ -57,15 +57,15 @@ public class Chunk implements Comparable {
     }
 
     void backup() {
+
         long wait_time = 1;
-        int putchunk_sent = 0;
+        int putChunk_sent = 0;
         int stored;
 
-
         do {
-            Peer.getMC().startSavingStoredConfirmsFor(this.ID);
+            Peer.getMDB().startingSaving(this.ID);
             Peer.getMessageForwarder().sendPutChunk(this);
-            putchunk_sent++;
+            putChunk_sent++;
 
             try {
                 TimeUnit.SECONDS.sleep(wait_time);
@@ -73,13 +73,13 @@ public class Chunk implements Comparable {
                 e.printStackTrace();
             }
 
-            stored = Peer.getMC().getNumStoredConfirmsFor(this.ID);
+            stored = Peer.getMDB().getNumBackups(this.ID);
 
             wait_time *= 2;
 
-        } while (stored < this.repDegree && putchunk_sent != 5);
+        } while (stored < this.repDegree && putChunk_sent != 5);
 
-        Peer.getMC().stopSavingStoredConfirmsFor(this.ID);
+        Peer.getMDB().stopSaving(this.ID);
     }
 
     @Override

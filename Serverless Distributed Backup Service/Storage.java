@@ -1,4 +1,7 @@
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
@@ -80,8 +83,22 @@ public class Storage implements java.io.Serializable {
     //Makes sure the added chunk isn't already there and adds it
     synchronized void addStoredChunk(Chunk chunk) {
 
+        File backupFolder = FileData.createFolder(Peer.getPeerFolder().getName() + "/backup");
+        File fileFolder = FileData.createFolder(backupFolder.getAbsolutePath() + "/" + chunk.getFileID());
+
+        FileOutputStream out;
+        try {
+            out = new FileOutputStream(fileFolder.getAbsolutePath() + "/chk" + chunk.getChunkNr());
+            out.write(chunk.getData());
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
         if (!isStoredAlready(chunk))
             this.storedChunks.add(chunk);
+
     }
 
     boolean isStoredAlready(Chunk chunk) {
@@ -144,6 +161,7 @@ public class Storage implements java.io.Serializable {
 
     synchronized void increaseRepDegree(String FileId, int ChunkNr) {
         String key = FileId + '_' + ChunkNr;
+        System.out.println(key);
         int total = this.storedReps.get(key) + 1;
         this.storedReps.replace(key, total);
     }

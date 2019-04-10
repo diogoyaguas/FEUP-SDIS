@@ -29,7 +29,7 @@ public class Peer implements RMI {
 
     private static final AtomicInteger count = new AtomicInteger(0);
     private int peerID;
-    private File peerFolder;
+    private static File peerFolder;
 
     private static MessageForwarder messageForwarder;
 
@@ -48,6 +48,10 @@ public class Peer implements RMI {
     }
 
     //GETS
+    static File getPeerFolder() {
+        return peerFolder;
+    }
+
     static int getServerId() {
         return serverId;
     }
@@ -98,6 +102,8 @@ public class Peer implements RMI {
             System.err.println("\nPeer exception: " + e.toString());
             e.printStackTrace();
         }
+
+        storage = new Storage();
 
         exec.execute(MC);
         exec.execute(MDB);
@@ -152,8 +158,6 @@ public class Peer implements RMI {
 
     @Override
     public void backup(String filepath, int replicationDegree) throws RemoteException {
-
-        File backupFolder = FileData.createFolder(peerFolder.getName() + "/backup");
 
         try {
 
@@ -211,5 +215,4 @@ public class Peer implements RMI {
     public void state() throws RemoteException {
 
     }
-
 }

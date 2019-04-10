@@ -25,9 +25,4 @@ class ChannelControl extends Channel {
         stored.remove(chunkID);
     }
 
-    public void save(String chunkId, int serverId) {
-
-    }
-
-
 }

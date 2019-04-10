@@ -23,7 +23,8 @@ public class App {
 
                 case "BACKUP":
                     int repDegree = Integer.parseInt(args[3]);
-                    stub.backup(filePath, repDegree);
+                    stub.backup("TestFiles/" + filePath, repDegree);
+                    System.out.println("Backup finished");
                     break;
 
                 case "RESTORE":

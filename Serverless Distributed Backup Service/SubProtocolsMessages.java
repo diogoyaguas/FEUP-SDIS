@@ -3,19 +3,19 @@ import java.util.Random;
 class SubProtocolsMessages {
 
     //IF ERROR - MAYBE NOT STATIC?
-    static void putchunk(String FileId, int ChunkNo, int ReplicationDeg, byte[] Body) {
+    static void putChunk(String FileId, int ChunkNo, int ReplicationDeg, byte[] Body) {
         //PUTCHUNK <Version> <SenderId> <FileId> <ChunkNo> <ReplicationDeg> <CRLF><CRLF><Body>
 
-        System.out.println("PUTCHUNK RECEIVED\t");
+        System.out.println("\nPUTCHUNK RECEIVED\t");
 
         Chunk chunk = new Chunk(ChunkNo, FileId, Body, ReplicationDeg);
 
         //SAVE
-
+        Peer.getMDB().save(chunk.getID(), 0);
 
         Peer.getStorage().addStoredChunk(chunk);
 
-        Peer.getMC().startSavingStoredConfirmsFor(chunk.getID());
+        Peer.getMDB().startingSaving(chunk.getID());
 
         Random rand = new Random();
         int n = rand.nextInt(400) + 1;
@@ -32,13 +32,13 @@ class SubProtocolsMessages {
 
     static void stored(int senderId, String FileId, int ChunkNo) {
         //STORED <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
-        System.out.println("STORED RECEIVED\t");
+        System.out.println("\nSTORED RECEIVED\t");
 
         String chunkId = ChunkNo + "_" + FileId;
         Chunk chunk = new Chunk(ChunkNo, FileId, new byte[0], 0);
 
         //SAVE
-        Peer.getMC();
+        Peer.getMC().startSavingStoredConfirmsFor(chunkId);
 
         if (Peer.getStorage().isStoredAlready(chunk))
             //INCREASE REP DEGREE

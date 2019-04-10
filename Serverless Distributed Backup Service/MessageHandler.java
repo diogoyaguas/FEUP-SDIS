@@ -12,9 +12,9 @@ public class MessageHandler implements Runnable {
     private DatagramPacket packet;
     private static String[] parsedHeader;
     private static byte[] body;
-    private int chunkNr, repDegree ;
-   
-    MessageHandler(DatagramPacket packet){
+    private int chunkNr, repDegree;
+
+    MessageHandler(DatagramPacket packet) {
         this.packet = packet;
     }
 
@@ -26,42 +26,41 @@ public class MessageHandler implements Runnable {
         String subProtocol = parsedHeader[0];
         int serverID = Integer.parseInt(parsedHeader[2]);
         String fileId = parsedHeader[3];
-        
-        if(serverID == Peer.getServerId())
-        return;
 
-        switch(subProtocol) {
+        if (serverID == Peer.getServerId())
+            return;
+
+        switch (subProtocol) {
             case "PUTCHUNK":
-            chunkNr = Integer.parseInt(parsedHeader[4]);
-            repDegree = Integer.parseInt(parsedHeader[5]);
-            SubProtocolsMessages.putchunk(fileId, chunkNr, repDegree, body);
-            break;
-
+                chunkNr = Integer.parseInt(parsedHeader[4]);
+                repDegree = Integer.parseInt(parsedHeader[5]);
+                SubProtocolsMessages.putChunk(fileId, chunkNr, repDegree, body);
+                break;
             case "STORED":
-            chunkNr = Integer.parseInt(parsedHeader[4]);
-            SubProtocolsMessages.stored(serverID, fileId, chunkNr);
-            break;
+                chunkNr = Integer.parseInt(parsedHeader[4]);
+                SubProtocolsMessages.stored(serverID, fileId, chunkNr);
+                break;
 
             case "DELETE":
-            SubProtocolsMessages.delete();
-            break;
+                SubProtocolsMessages.delete();
+                break;
 
             case "GETCHUNK":
-            SubProtocolsMessages.getchunk();
-            break;
+                SubProtocolsMessages.getchunk();
+                break;
 
             case "CHUNK":
-            chunkNr = Integer.parseInt(parsedHeader[4]);
-            repDegree = Integer.parseInt(parsedHeader[5]);
-            SubProtocolsMessages.chunk(fileId, chunkNr, repDegree, body);
-            break;
+                chunkNr = Integer.parseInt(parsedHeader[4]);
+                repDegree = Integer.parseInt(parsedHeader[5]);
+                SubProtocolsMessages.chunk(fileId, chunkNr, repDegree, body);
+                break;
 
             case "REMOVED":
-            SubProtocolsMessages.removed();
-            break;
+                SubProtocolsMessages.removed();
+                break;
 
             default:
-            break;
+                break;
         }
 
     }
@@ -72,34 +71,33 @@ public class MessageHandler implements Runnable {
         String header = " ";
 
         ByteArrayInputStream input = new ByteArrayInputStream(packet.getData());
-		BufferedReader output = new BufferedReader(new InputStreamReader(input));
+        BufferedReader output = new BufferedReader(new InputStreamReader(input));
 
-
-		try{
+        try {
             header = output.readLine();
-        }
-		catch(Exception e){
+        } catch (Exception e) {
             System.err.println("\nParseHeader Exception: " + e.toString());
             e.printStackTrace();
         }
 
         return header.split(" ");
     }
+
     private static byte[] parseBody(DatagramPacket packet) {
 
         ByteArrayInputStream input = new ByteArrayInputStream(packet.getData());
-		BufferedReader output = new BufferedReader(new InputStreamReader(input));
+        BufferedReader output = new BufferedReader(new InputStreamReader(input));
 
         String header = "";
 
-        try  {
+        try {
             header += output.readLine();
-        } catch(Exception e){
+        } catch (Exception e) {
             System.err.println("\nParseBody Exception: " + e.toString());
             e.printStackTrace();
         }
 
-        int bodyIndex = header.length() + 2* MessageForwarder.CRLF.length();
+        int bodyIndex = header.length() + 2 * MessageForwarder.CRLF.length();
 
         body = Arrays.copyOfRange(packet.getData(), bodyIndex, packet.getLength());
 

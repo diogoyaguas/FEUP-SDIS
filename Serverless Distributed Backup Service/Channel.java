@@ -5,7 +5,7 @@ import java.net.MulticastSocket;
 
 public abstract class Channel implements Runnable {
 
-    private static final int PACKET_MAX_SIZE = 2048;
+    private static final int PACKET_MAX_SIZE = 650000;
     private MulticastSocket socket;
 
     private InetAddress address;
