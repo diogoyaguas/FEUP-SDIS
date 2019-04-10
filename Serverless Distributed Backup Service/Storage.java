@@ -84,7 +84,7 @@ public class Storage implements java.io.Serializable {
     synchronized void addStoredChunk(Chunk chunk) {
 
         File backupFolder = FileData.createFolder(Peer.getPeerFolder().getName() + "/backup");
-        File fileFolder = FileData.createFolder(backupFolder.getAbsolutePath() + "/" + chunk.getFileID());
+        File fileFolder = FileData.createFolder(Peer.getPeerFolder().getName() + "/backup/" + chunk.getFileID());
 
         FileOutputStream out;
         try {
