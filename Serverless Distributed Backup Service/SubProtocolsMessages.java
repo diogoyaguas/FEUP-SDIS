@@ -110,11 +110,6 @@ class SubProtocolsMessages {
         //CHUNK <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF><Body>
 
         System.out.println("CHUNK RECEIVED\t");
-
-
-
-
-
-
+        
     }
 };
