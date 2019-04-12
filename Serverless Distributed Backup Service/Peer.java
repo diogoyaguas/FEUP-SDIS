@@ -267,7 +267,7 @@ public class Peer implements RMI {
 
         try {
 
-            restore = new FileOutputStream(restoreFolder.getPath() + file.getName());
+            restore = new FileOutputStream(restoreFolder.getPath() + "/" + file.getName());
             restore.write(dataBody);
             restore.close();
 

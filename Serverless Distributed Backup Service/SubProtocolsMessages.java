@@ -2,6 +2,7 @@ import java.util.Random;
 import java.util.ArrayList;
 import java.io.File;
 import java.io.IOException;
+import java.io.FileOutputStream;
 
 class SubProtocolsMessages {
 
@@ -70,11 +71,13 @@ class SubProtocolsMessages {
 
         System.out.println("GETCHUNK RECEIVED\t");
 
-        File file = new File(fileId + "_" + ChunkNo);
+        File file = new File(Peer.getPeerFolder().getAbsolutePath() + "/backup/" + fileId + "/chk" + ChunkNo);
 
-        System.out.println(fileId);
+        System.out.println(file.getAbsolutePath());
 
         Peer.getMDR().startRestore(fileId);
+
+        System.out.println(file.exists());
 
         if (file.exists()) {
             try {
