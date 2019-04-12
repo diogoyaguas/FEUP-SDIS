@@ -72,6 +72,8 @@ class SubProtocolsMessages {
 
         File file = new File(fileId + "_" + ChunkNo);
 
+        System.out.println(fileId);
+
         Peer.getMDR().startRestore(fileId);
 
         if (file.exists()) {
@@ -110,6 +112,12 @@ class SubProtocolsMessages {
         //CHUNK <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF><Body>
 
         System.out.println("CHUNK RECEIVED\t");
-        
+
+        Chunk chunk = new Chunk(ChunkNo, FileId, Body, repDegree);
+
+        if(Peer.getMDR().restoring(FileId)) {
+            Peer.getMDR().save(FileId, chunk);
+        }
+
     }
 };
