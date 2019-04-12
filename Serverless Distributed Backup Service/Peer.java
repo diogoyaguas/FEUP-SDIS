@@ -1,4 +1,6 @@
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -8,6 +10,8 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,6 +30,7 @@ public class Peer implements RMI {
     private static ChannelRestore MDR;
     private static ScheduledThreadPoolExecutor exec;
     private static Storage storage;
+    private static SubProtocolsMessages protocols;
 
     private static final AtomicInteger count = new AtomicInteger(0);
     private int peerID;
@@ -199,7 +204,80 @@ public class Peer implements RMI {
     @Override
     public void restore(String filepath) throws RemoteException {
 
+        //acho que consigo fazer de outra maneira - n dá para ir pesquisar aos stored aqueles com o fileId que temos
+        //e com isso temos o size? Idk, falta de sono?
+
+        File file = new File(filepath);
+
+        String FileId = "";
+
+        try {
+            FileId = FileData.getFileId(file);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        getMDR().startRestore(FileId);
+
+        ArrayList<Chunk> chunks = new ArrayList<Chunk>();
+
+        int i = 0;
+        boolean lastChunk = false;
+        long wait_time = 1;
+
+        do {
+
+            getMessageForwarder().sendGetChunk(i, FileId);
+
+            try {
+                TimeUnit.SECONDS.sleep(wait_time);
+            } catch (InterruptedException e) {
+                e.printStackTrace(); }
+
+            Chunk chunk = Peer.getMDR().getRestored(FileId).get(i);
+
+            //if chunk length is not 64 its  the last byte
+            if(chunk.getData().length != chunk.getMaxSize())
+            lastChunk = true;
+
+            chunks.add(chunk);
+            i++;
+
+        } while(!lastChunk);
+
+        getMDR().stopRestore(FileId);
+
+        byte [] dataBody = new byte[0];
+        byte [] tmp = new byte[0];
+
+        for(int j = 0; j < chunks.size(); j++) {
+
+            byte [] chunkBody = chunks.get(j).getData();
+
+            tmp = new byte[dataBody.length + chunkBody.length];
+            System.arraycopy(dataBody, 0, tmp,0, dataBody.length);
+            System.arraycopy(chunkBody, 0, tmp, dataBody.length, chunkBody.length);
+
+            dataBody = tmp;
+        }
+
+        File restoreFolder = FileData.createFolder(Peer.getPeerFolder().getName() + "/restore");
+
+        FileOutputStream restore;
+
+        try {
+
+            restore = new FileOutputStream(restoreFolder.getPath() + file.getName());
+            restore.write(dataBody);
+            restore.close();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+
 
     @Override
     public void delete(String filepath) throws RemoteException {

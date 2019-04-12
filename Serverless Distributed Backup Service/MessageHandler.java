@@ -46,7 +46,8 @@ public class MessageHandler implements Runnable {
                 break;
 
             case "GETCHUNK":
-                SubProtocolsMessages.getchunk();
+                chunkNr = Integer.parseInt(parsedHeader[4]);
+                SubProtocolsMessages.getchunk(serverID, fileId, chunkNr);
                 break;
 
             case "CHUNK":

@@ -1,4 +1,7 @@
 import java.util.Random;
+import java.util.ArrayList;
+import java.io.File;
+import java.io.IOException;
 
 class SubProtocolsMessages {
 
@@ -62,17 +65,55 @@ class SubProtocolsMessages {
     }
 
     //R E S T O R E
-    static void getchunk() {
+    static void getchunk(int senderId, String fileId, int ChunkNo) {
         //GETCHUNK <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
 
         System.out.println("GETCHUNK RECEIVED\t");
 
+        File file = new File(fileId + "_" + ChunkNo);
+
+        Peer.getMDR().startRestore(fileId);
+
+        if (file.exists()) {
+            try {
+
+                byte[] dataBody = FileData.loadFile(file);
+                Chunk chunk = new Chunk(ChunkNo, fileId, dataBody, 0);
+
+                Random delay = new Random();
+                int n = delay.nextInt(400) + 1;
+
+
+                try {
+                    Thread.sleep(n);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            ArrayList<Chunk> chunks = Peer.getMDR().getRestored(fileId);
+
+            if (chunks != null) {
+                if (!chunks.contains(new Chunk(ChunkNo, fileId, new byte[0], 0)))
+                    Peer.getMessageForwarder().sendChunk(chunk);
+            }
+
+        } catch(IOException e){
+            e.printStackTrace();
+        }
+
     }
+
+    Peer.getMDR().stopRestore(fileId);
+}
 
     static void chunk(String FileId, int ChunkNo, int repDegree, byte[] Body) {
         //CHUNK <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF><Body>
 
         System.out.println("CHUNK RECEIVED\t");
+
+
+
+
 
 
     }
