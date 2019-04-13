@@ -1,28 +1,28 @@
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 
 class FileData {
 
-    private File file;
-
-    public FileData(String path) {
-        this.file = new File(path);
-    }
-
     static byte[] loadFile(File file) throws IOException {
-        FileInputStream file_is = new FileInputStream(file);
 
-        byte[] file_data = new byte[(int) file.length()];
+        try {
+            FileInputStream file_is = new FileInputStream(file);
 
-        file_is.read(file_data);
-        file_is.close();
+            byte[] file_data = new byte[(int) file.length()];
 
-        return file_data;
+            file_is.read(file_data);
+            file_is.close();
+
+            return file_data;
+        } catch (FileNotFoundException e) {
+            // do stuff here..
+            return null;
+        }
     }
 
     static String getFileId(File file) throws NoSuchAlgorithmException {

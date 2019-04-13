@@ -178,8 +178,9 @@ public class Peer implements RMI {
             String final_file_id = FileData.getFileId(file);
 
             // gets number of chunks
+            assert file_data != null;
             int chunks_num = file_data.length / (Chunk.getMaxSize()) + 1;
-            ArrayList<Chunk> storedChuncks = new ArrayList<>();
+            ArrayList<Chunk> storedChunks = new ArrayList<>();
 
             for (int i = 0; i < chunks_num; i++) {
 
@@ -199,7 +200,7 @@ public class Peer implements RMI {
                 // creates chunk
                 Chunk chunk = new Chunk(i, final_file_id, data, replicationDegree);
 
-                storedChuncks.add(chunk);
+                storedChunks.add(chunk);
 
                 // chunk backup
                 chunk.backup();
@@ -208,7 +209,7 @@ public class Peer implements RMI {
 
             storage.addFile(final_file_id, file);
             storage.addDesiredReplicationDegree(final_file_id, replicationDegree);
-            storage.addChunks(final_file_id, storedChuncks);
+            storage.addChunks(final_file_id, storedChunks);
 
             System.out.println("\nBackup finished");
 
@@ -344,6 +345,8 @@ public class Peer implements RMI {
 
             Peer.getMessageForwarder().sendRemoved(chunk.getChunkNr(), chunk.getFileID());
 
+            iter.remove();
+
             tempSpace -= chunk.getData().length;
 
             String fileName = Peer.getPeerFolder().getAbsolutePath() + "/backup/" + chunk.getFileID() + "/chk" + chunk.getChunkNr();
@@ -353,8 +356,6 @@ public class Peer implements RMI {
             String folderName = Peer.getPeerFolder().getAbsolutePath() + "/backup/" + chunk.getFileID();
             File folder = new File(folderName);
             folder.delete();
-
-            iter.remove();
 
             i++;
 
