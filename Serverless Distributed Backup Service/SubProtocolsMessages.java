@@ -67,17 +67,15 @@ class SubProtocolsMessages {
 
         //REMOVED <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
 
-   /*     System.out.println("\nREMOVED received\t");
-
-        Chunk chunk = new Chunk(ChunkNo, FileId, new byte[0], 0);
+        System.out.println("\nREMOVED received\t");
 
         HashSet<Chunk> chunks = Peer.getStorage().getStoredChunks();
 
-        if (chunks.contains(chunk)) {
+        Iterator iter = chunks.iterator();
+        Chunk chunk_iter = (Chunk) iter.next();
+        Chunk chunk = new Chunk(ChunkNo, FileId, new byte[0], 0);
 
-            System.out.println("Contains");
-            Iterator iter = chunks.iterator();
-            Chunk chunk_iter = (Chunk) iter.next();
+        if (chunk_iter.getFileID().equals(FileId) && chunk_iter.getChunkNr() == ChunkNo) {
             while (true) {
 
                 if (chunk_iter.getID().equals(chunk.getID())) {
@@ -113,8 +111,9 @@ class SubProtocolsMessages {
                     return;
                 }
             }
-        }*/
+        }
     }
+
 
     //R E S T O R E
     static void getchunk(int senderId, String fileId, int ChunkNo) {

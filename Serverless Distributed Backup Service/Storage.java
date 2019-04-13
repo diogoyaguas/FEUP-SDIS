@@ -1,66 +1,91 @@
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
 class Storage implements java.io.Serializable {
 
-    private ArrayList<FileData> files;
-    private ArrayList<Chunk> storedChunks;
-    private ArrayList<Chunk> receivedChunks;
-    private ConcurrentHashMap<String, Integer> storedReps;
-    private ConcurrentHashMap<String, String> wantedChunks;
-    private int spaceAvailable;
-    private long spaceUsed;
-    private int MAX_SPACE = 500000;
+    private HashMap<String, File> files;
+    private HashMap<String, Integer> desiredReplicationDegree;
+    private HashMap<String, ArrayList<Chunk>> fileChunks;
 
-    public Storage() {
-        this.files = new ArrayList<>();
+    private HashSet<Chunk> storedChunks;
+    private ConcurrentHashMap<String, Integer> storedReps;
+
+    private long MAX_SPACE = 500000;
+    private long spaceAvailable;
+    private long spaceUsed;
+
+    Storage() {
+
+        this.files = new HashMap<>();
+        this.desiredReplicationDegree = new HashMap<>();
+        this.fileChunks = new HashMap<>();
+
         this.storedChunks = new HashSet<>();
-        this.receivedChunks = new ArrayList<>();
         this.storedReps = new ConcurrentHashMap<>();
-        this.wantedChunks = new ConcurrentHashMap<>();
+
         this.spaceAvailable = MAX_SPACE;
+        this.spaceUsed = 0;
     }
 
     //GETS
-    public ArrayList<FileData> getFiles() { return files; }
-    public ArrayList<Chunk> getStoredChunks() { return storedChunks; }
-    public ArrayList<Chunk> getReceivedChunks() { return receivedChunks; }
-    public ConcurrentHashMap<String, Integer> getStoredReps() { return storedReps; }
-    public ConcurrentHashMap<String, String> getWantedChunks() { return wantedChunks; }
-    public int getSpaceAvailable() { return spaceAvailable; }
-    public int getOccupiedSpace() { return MAX_SPACE - getSpaceAvailable(); }
+    HashMap<String, File> getFiles() {
 
-    //SETS
-    public synchronized void setSpaceAvailable(int spaceAvailable) {
-        this.spaceAvailable = spaceAvailable;
+        return files;
     }
 
-    public void setWantedChunkReceived(String FileId, int ChunkNr) {
-        this.wantedChunks.put(FileId + '_' + ChunkNr, "true");
+    HashMap<String, Integer> getDesiredReplicationDegree() {
+
+        return desiredReplicationDegree;
     }
 
-    public void setStoredChunkRepDegree() {
+    HashMap<String, ArrayList<Chunk>> getFileChunks() {
 
-        for (Chunk stored : this.storedChunks) {
-            String key = stored.getFileID() + "_" + stored.getChunkNr();
-            stored.setCurrentRepDegree(this.storedReps.get(key));
-        }
+        return fileChunks;
+    }
+
+    HashSet<Chunk> getStoredChunks() {
+
+        return storedChunks;
+    }
+
+    ConcurrentHashMap<String, Integer> getStoredReps() {
+
+        return storedReps;
+    }
+
+    long getSpaceAvailable() {
+
+        return spaceAvailable;
+    }
+
+    long getOccupiedSpace() {
+
+        spaceUsed = MAX_SPACE - getSpaceAvailable();
+        return spaceUsed;
     }
 
     //ADDS
-    public void addFile(FileData file) {
-        this.files.add(file);
+    void addFile(String fileID, File file) {
+
+        files.put(fileID, file);
     }
 
-    public void addWantedChunk(String FileId, int ChunkNr) {
-        this.wantedChunks.put(FileId + '_' + ChunkNr, "false");
+    void addDesiredReplicationDegree(String fileID, int replicationDegree) {
+
+        desiredReplicationDegree.put(fileID, replicationDegree);
     }
 
-    //Makes sure the added chunk isn't already there and adds it
+    void addChunks(String file_id, ArrayList<Chunk> storedChuncks) {
+
+        fileChunks.put(file_id, storedChuncks);
+    }
+
     synchronized void addStoredChunk(Chunk chunk) {
 
         byte[] chunk_data = chunk.getData();
@@ -111,7 +136,22 @@ class Storage implements java.io.Serializable {
     }
 
     //DELETES
-    public void deleteStoredChunk(String FileId) {
+    void deleteFile(String file_id) {
+
+        files.remove(file_id);
+    }
+
+    void deleteDesiredReplicationDegree(String file_id) {
+
+        desiredReplicationDegree.remove(file_id);
+    }
+
+    void deleteFileChunks(String file_id) {
+
+        fileChunks.remove(file_id);
+    }
+
+    void deleteStoredChunk(String FileId) {
 
         for (Iterator<Chunk> it = this.storedChunks.iterator(); it.hasNext(); ) {
 
@@ -137,19 +177,24 @@ class Storage implements java.io.Serializable {
         folder.delete();
 
     }
+
     private synchronized void deleteReps(String FileId, int ChunkNr) {
+
         this.storedReps.remove(FileId + '_' + ChunkNr);
     }
 
     void reclaimSpace(long spaceClaimed) {
+
         this.spaceAvailable += spaceClaimed;
         this.spaceUsed -= spaceClaimed;
     }
 
     //INCREASE & DECREASE SPACE
-    public synchronized void decreaseSpace(int ChunkSize) {
+    private synchronized void decreaseSpace(int ChunkSize) {
+
         spaceAvailable -= ChunkSize;
     }
+
     private synchronized void freeSpace(String FileId, int ChunkNr) {
 
         for (Chunk stored : this.storedChunks) {
@@ -159,15 +204,17 @@ class Storage implements java.io.Serializable {
     }
 
     //DECREASE & INCREASE REP DEGREE
-    public synchronized void decreaseRepDegree(String FileId, int ChunkNr) {
+    synchronized void decreaseRepDegree(String FileId, int ChunkNr) {
+
         String key = FileId + '_' + ChunkNr;
         int total = this.storedReps.get(key) - 1;
         this.storedReps.replace(key, total);
     }
+
     synchronized void increaseRepDegree(String FileId, int ChunkNr) {
+
         String key = FileId + '_' + ChunkNr;
         int total = this.storedReps.get(key) + 1;
         this.storedReps.replace(key, total);
     }
-
-};
+}

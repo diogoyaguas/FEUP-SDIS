@@ -9,14 +9,9 @@ import java.util.ArrayList;
 class FileData {
 
     private File file;
-    private int repDegree;
-    //do i need this?
-    private ArrayList<Chunk> chunks;
 
-    public FileData(String path, int repDegree){
+    public FileData(String path) {
         this.file = new File(path);
-        this.repDegree = repDegree;
-        this.chunks = new ArrayList<>();
     }
 
     static byte[] loadFile(File file) throws IOException {
@@ -73,6 +68,4 @@ class FileData {
         return theDir;
     }
 
-    public int getReplicationDegree() { return this.repDegree;}
-    public File getFile() { return file;}
 }

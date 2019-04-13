@@ -53,34 +53,42 @@ public class Peer implements RMI {
 
     //GETS
     static File getPeerFolder() {
+
         return peerFolder;
     }
 
     static int getServerId() {
+
         return serverId;
     }
 
     static int getPeerID() {
+
         return peerID;
     }
 
     static ChannelControl getMC() {
+
         return MC;
     }
 
     static ChannelBackup getMDB() {
+
         return MDB;
     }
 
     static ChannelRestore getMDR() {
+
         return MDR;
     }
 
     static MessageForwarder getMessageForwarder() {
+
         return messageForwarder;
     }
 
     static Storage getStorage() {
+
         return storage;
     }
 
@@ -171,6 +179,7 @@ public class Peer implements RMI {
 
             // gets number of chunks
             int chunks_num = file_data.length / (Chunk.getMaxSize()) + 1;
+            ArrayList<Chunk> storedChuncks = new ArrayList<>();
 
             for (int i = 0; i < chunks_num; i++) {
 
@@ -190,10 +199,16 @@ public class Peer implements RMI {
                 // creates chunk
                 Chunk chunk = new Chunk(i, final_file_id, data, replicationDegree);
 
+                storedChuncks.add(chunk);
+
                 // chunk backup
                 chunk.backup();
 
             }
+
+            storage.addFile(final_file_id, file);
+            storage.addDesiredReplicationDegree(final_file_id, replicationDegree);
+            storage.addChunks(final_file_id, storedChuncks);
 
             System.out.println("\nBackup finished");
 
@@ -294,6 +309,10 @@ public class Peer implements RMI {
             e.printStackTrace();
         }
 
+        storage.deleteFile(file_id);
+        storage.deleteDesiredReplicationDegree(file_id);
+        storage.deleteFileChunks(file_id);
+
         Peer.getMessageForwarder().sendDelete(file_id);
 
         System.out.println("\nFile deleted");
@@ -303,8 +322,8 @@ public class Peer implements RMI {
     @Override
     public void reclaim(int size) {
 
-        long spaceUsed = Peer.getStorage().getSpaceUsed();
-        long spaceClaimed = size;
+        long spaceUsed = Peer.getStorage().getOccupiedSpace();
+        long spaceClaimed = size * 1000;
 
         System.out.println("1.Usado: " + spaceUsed);
         System.out.println("1.Livre: " + Peer.getStorage().getSpaceAvailable());
@@ -353,7 +372,7 @@ public class Peer implements RMI {
 
         Peer.getStorage().reclaimSpace(spaceClaimed);
 
-        System.out.println("3.Usado: " + Peer.getStorage().getSpaceUsed());
+        System.out.println("3.Usado: " + Peer.getStorage().getOccupiedSpace());
         System.out.println("3.Livre: " + Peer.getStorage().getSpaceAvailable());
         System.out.println("3.Preciso: " + spaceClaimed);
         System.out.println("\nSpace reclaimed");
@@ -362,54 +381,68 @@ public class Peer implements RMI {
     @Override
     public void state() {
 
+        System.out.println("\n| Peer State |");
+
         //Each file whose backup it has initiated
+        int i = 1;
 
-        for(int i = 0; i < storage.getFiles().size(); i++){
+        for (String key : storage.getFiles().keySet()) {
 
-            //the file pathname
-            System.out.println("File Pathname - " + storage.getFiles().get(i).getFile().getAbsolutePath() + "\t");
+            System.out.println("\n| File " + i + " |");
 
-            //backup service id of the file
-            try {
-                String FileId = FileData.getFileId(storage.getFiles().get(i).getFile());
-                System.out.println("File Id  - " + FileId + "\t");
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
+            //File pathname
+            System.out.println("\tFile Pathname - " + storage.getFiles().get(key).getPath() + "\t");
+
+            //Backup service id of the file
+            System.out.println("\tFile Id - " + key);
+
+            //Desired replication degree
+            System.out.println("\tDesired replication degree - " + storage.getDesiredReplicationDegree().get(key));
+
+            ArrayList<Chunk> chunks = storage.getFileChunks().get(key);
+
+            for (Chunk chunk : chunks) {
+
+                System.out.println("\n\tChunk " + (chunk.getChunkNr() + 1));
+
+                System.out.println("\t\tChunk ID - " + chunk.getID());
+                System.out.println("\t\tChunk perceived replication degree - " + chunk.getRepDegree());
+
             }
 
-
-            // TO DO
-            //desired replication degree
-           // System.out.println("Desired Replication Degree - "  storage.getFiles().get(i).get);
-
-            //Each chunk of the file
-
-
-            //id
-            //perceived replication degree
+            i++;
         }
 
         //Each chunk it stores
-    for(int k = 0; k < storage.getStoredChunks().size(); k++){
+        if (!storage.getStoredChunks().isEmpty()) {
+            System.out.println("\n| Stored Chunks |");
+            i = 1;
+        }
 
-        //id
-        System.out.println("Chunk ID - " + storage.getStoredChunks().get(k).getID() + "\t");
+        for (Chunk chunk : storage.getStoredChunks()) {
 
-        //size (in KB)
-        System.out.println("Chunk Size - " + (storage.getStoredChunks().get(k).getData()).length + " KB \t");
+            System.out.println("\n\tChunk " + i);
+            //ID
+            System.out.println("\t\tChunk ID - " + chunk.getID() + "\t");
 
-        //perceived replication degree
-        String key = storage.getStoredChunks().get(k).getFileID() + '_' + storage.getStoredChunks().get(k).getChunkNr();
-        System.out.println("Chunk Replication Degree - " + storage.getStoredReps().get(key) + "\t");
-    }
+            //Size (in KB)
+            System.out.println("\t\tChunk Size - " + chunk.getData().length + " KB \t");
 
-        //peer's storage capacity
+            //Perceived replication degree
+            String key = chunk.getFileID() + '_' + chunk.getChunkNr();
+            System.out.println("\t\tChunk Replication Degree - " + storage.getStoredReps().get(key) + "\t");
 
-        //maximum amount of disk space to store chunks
-        System.out.println("Maximum amount of Disk Space to store chunks - " + storage.getSpaceAvailable()/1000 + " KB \t");
+            i++;
+        }
 
-        //amount of storage to backup chunks
-        System.out.println("Maximum amount of Disk Space to store chunks - " + storage.getOccupiedSpace()/1000 + " KB \t");
+        //Peer's storage capacity
+        System.out.println("\n| Storage Capacity |\n");
+
+        //Maximum amount of disk space to store chunks
+        System.out.println("\tMaximum amount of Disk Space to store chunks - " + storage.getSpaceAvailable() / 1000 + " KB \t");
+
+        //Amount of storage to backup chunks
+        System.out.println("\tAmount of storage used to backup the chunks - " + storage.getOccupiedSpace() / 1000 + " KB \t");
 
     }
 }
