@@ -325,22 +325,12 @@ public class Peer implements RMI {
         long spaceUsed = Peer.getStorage().getOccupiedSpace();
         long spaceClaimed = size * 1000;
 
-        System.out.println("1.Usado: " + spaceUsed);
-        System.out.println("1.Livre: " + Peer.getStorage().getSpaceAvailable());
-        System.out.println("1.Preciso: " + spaceClaimed);
-        System.out.println("");
-
         if (spaceUsed == 0) {
             System.out.println("No space used. Impossible to reclaim space");
             return;
         } else if (spaceUsed < spaceClaimed) {
             spaceClaimed = spaceUsed;
         }
-
-        System.out.println("2.Usado: " + spaceUsed);
-        System.out.println("2.Livre: " + Peer.getStorage().getSpaceAvailable());
-        System.out.println("2.Preciso: " + spaceClaimed);
-        System.out.println("");
 
         HashSet<Chunk> chunks = Peer.getStorage().getStoredChunks();
 
@@ -354,8 +344,6 @@ public class Peer implements RMI {
 
             Peer.getMessageForwarder().sendRemoved(chunk.getChunkNr(), chunk.getFileID());
 
-            iter.remove();
-
             tempSpace -= chunk.getData().length;
 
             String fileName = Peer.getPeerFolder().getAbsolutePath() + "/backup/" + chunk.getFileID() + "/chk" + chunk.getChunkNr();
@@ -366,16 +354,14 @@ public class Peer implements RMI {
             File folder = new File(folderName);
             folder.delete();
 
+            iter.remove();
+
             i++;
 
         } while (tempSpace > 0 && i < chunks.size());
 
         Peer.getStorage().reclaimSpace(spaceClaimed);
 
-        System.out.println("3.Usado: " + Peer.getStorage().getOccupiedSpace());
-        System.out.println("3.Livre: " + Peer.getStorage().getSpaceAvailable());
-        System.out.println("3.Preciso: " + spaceClaimed);
-        System.out.println("\nSpace reclaimed");
     }
 
     @Override
