@@ -1,19 +1,19 @@
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Peer implements RMI {
@@ -30,10 +30,9 @@ public class Peer implements RMI {
     private static ChannelRestore MDR;
     private static ScheduledThreadPoolExecutor exec;
     private static Storage storage;
-    private static SubProtocolsMessages protocols;
 
     private static final AtomicInteger count = new AtomicInteger(0);
-    private int peerID;
+    private static int peerID;
     private static File peerFolder;
 
     private static MessageForwarder messageForwarder;
@@ -42,7 +41,7 @@ public class Peer implements RMI {
     private Peer() {
         peerID = count.incrementAndGet();
 
-        peerFolder = FileData.createFolder(peerAp);
+        peerFolder = FileData.createFolder("Files/" + peerAp);
 
         exec = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(250);
 
@@ -61,7 +60,7 @@ public class Peer implements RMI {
         return serverId;
     }
 
-    public int getPeerID() {
+    static int getPeerID() {
         return peerID;
     }
 
@@ -98,8 +97,8 @@ public class Peer implements RMI {
             RMI stub = (RMI) UnicastRemoteObject.exportObject(obj, 0);
 
             // Bind the remote object's stub in the registry
-            Registry registry = LocateRegistry.getRegistry();
-            registry.bind(peerAp, stub);
+            Registry registry = LocateRegistry.getRegistry("localhost");
+            registry.rebind(peerAp, stub);
 
             System.err.println("\nPeer " + peerAp + " ready");
 
@@ -162,7 +161,7 @@ public class Peer implements RMI {
     }
 
     @Override
-    public void backup(String filepath, int replicationDegree) throws RemoteException {
+    public void backup(String filepath, int replicationDegree) {
 
         try {
 
@@ -196,16 +195,15 @@ public class Peer implements RMI {
 
             }
 
+            System.out.println("\nBackup finished");
+
         } catch (IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public void restore(String filepath) throws RemoteException {
-
-        //acho que consigo fazer de outra maneira - n dá para ir pesquisar aos stored aqueles com o fileId que temos
-        //e com isso temos o size? Idk, falta de sono?
+    public void restore(String filepath) {
 
         File file = new File(filepath);
 
@@ -219,7 +217,7 @@ public class Peer implements RMI {
 
         getMDR().startRestore(FileId);
 
-        ArrayList<Chunk> chunks = new ArrayList<Chunk>();
+        ArrayList<Chunk> chunks = new ArrayList<>();
 
         int i = 0;
         boolean lastChunk = false;
@@ -232,36 +230,42 @@ public class Peer implements RMI {
             try {
                 TimeUnit.SECONDS.sleep(wait_time);
             } catch (InterruptedException e) {
-                e.printStackTrace(); }
+                e.printStackTrace();
+            }
+
+            if(Peer.getMDR().getRestored(FileId).isEmpty()) {
+                System.out.println("\nImpossible to restore this file");
+                return;
+            }
 
             Chunk chunk = Peer.getMDR().getRestored(FileId).get(i);
 
-            //if chunk length is not 64 its  the last byte
-            if(chunk.getData().length != chunk.getMaxSize())
-            lastChunk = true;
+            //if chunk length is not 64 bytes , so it's the last byte
+            if (chunk.getData().length != Chunk.getMaxSize())
+                lastChunk = true;
 
             chunks.add(chunk);
             i++;
 
-        } while(!lastChunk);
+        } while (!lastChunk);
 
         getMDR().stopRestore(FileId);
 
-        byte [] dataBody = new byte[0];
-        byte [] tmp = new byte[0];
+        byte[] dataBody = new byte[0];
+        byte[] tmp;
 
-        for(int j = 0; j < chunks.size(); j++) {
+        for (Chunk chunk : chunks) {
 
-            byte [] chunkBody = chunks.get(j).getData();
+            byte[] chunkBody = chunk.getData();
 
             tmp = new byte[dataBody.length + chunkBody.length];
-            System.arraycopy(dataBody, 0, tmp,0, dataBody.length);
+            System.arraycopy(dataBody, 0, tmp, 0, dataBody.length);
             System.arraycopy(chunkBody, 0, tmp, dataBody.length, chunkBody.length);
 
             dataBody = tmp;
         }
 
-        File restoreFolder = FileData.createFolder(Peer.getPeerFolder().getName() + "/restore");
+        File restoreFolder = FileData.createFolder("Files/" + Peer.getPeerFolder().getName() + "/restore");
 
         FileOutputStream restore;
 
@@ -271,16 +275,16 @@ public class Peer implements RMI {
             restore.write(dataBody);
             restore.close();
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        System.out.println("\nRestore finished");
     }
 
 
     @Override
-    public void delete(String filepath) throws RemoteException {
+    public void delete(String filepath) {
 
         File file = new File(filepath);
         String file_id = "";
@@ -293,15 +297,52 @@ public class Peer implements RMI {
 
         Peer.getMessageForwarder().sendDelete(file_id);
 
-    }
-
-    @Override
-    public void reclaim(int size) throws RemoteException {
+        System.out.println("\nFile deleted");
 
     }
 
     @Override
-    public void state() throws RemoteException {
+    public void reclaim(int size) {
+
+        long spaceUsed = Peer.getStorage().getSpaceUsed();
+
+        System.out.println("1.Usado: " + spaceUsed);
+        System.out.println("1.Livre: " + Peer.getStorage().getSpaceAvailable());
+  
+        if(spaceUsed == 0 ) {
+            System.out.println("No space used. Impossible to reclaim space");
+            return;
+        }
+
+        HashSet<Chunk> chunks = Peer.getStorage().getStoredChunks();
+
+        int i = 0;
+
+        Iterator iter = chunks.iterator();
+
+        do {
+            Chunk chunk = (Chunk) iter.next();
+
+            Peer.getMessageForwarder().sendRemoved(chunk.getChunkNr(), chunk.getFileID());
+
+            iter.remove();
+
+            size -= chunk.getData().length;
+
+            i++;
+
+        } while (size > 0 && i < chunks.size());
+
+
+        System.out.println("3.Usado: " + Peer.getStorage().getSpaceUsed());
+        System.out.println("3.Livre: " + Peer.getStorage().getSpaceAvailable());
+        System.out.println("\nSpace reclaimed");
+
+        Peer.getStorage().reclaimSpace(size, 1);
+    }
+
+    @Override
+    public void state() {
 
     }
 }

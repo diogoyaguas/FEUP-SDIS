@@ -4,7 +4,6 @@ import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.util.Arrays;
 
-
 //HEADER - <Protocol> <Version> <SenderId> <FileId> <ChunkNr> <RepDegree> <CRLF>
 
 public class MessageHandler implements Runnable {
@@ -13,6 +12,7 @@ public class MessageHandler implements Runnable {
     private static String[] parsedHeader;
     private static byte[] body;
     private int chunkNr, repDegree;
+    private static String header = "";
 
     MessageHandler(DatagramPacket packet) {
         this.packet = packet;
@@ -36,9 +36,10 @@ public class MessageHandler implements Runnable {
                 repDegree = Integer.parseInt(parsedHeader[5]);
                 SubProtocolsMessages.putChunk(fileId, chunkNr, repDegree, body);
                 break;
+
             case "STORED":
                 chunkNr = Integer.parseInt(parsedHeader[4]);
-                SubProtocolsMessages.stored(serverID, fileId, chunkNr);
+                SubProtocolsMessages.stored(fileId, chunkNr);
                 break;
 
             case "DELETE":
@@ -57,7 +58,8 @@ public class MessageHandler implements Runnable {
                 break;
 
             case "REMOVED":
-                SubProtocolsMessages.removed();
+                chunkNr = Integer.parseInt(parsedHeader[4]);
+                SubProtocolsMessages.removed(fileId, chunkNr);
                 break;
 
             default:
@@ -69,7 +71,7 @@ public class MessageHandler implements Runnable {
     //PARSE MESSAGE
     private String[] parseHeader(DatagramPacket packet) {
 
-        String header = " ";
+        header = "";
 
         ByteArrayInputStream input = new ByteArrayInputStream(packet.getData());
         BufferedReader output = new BufferedReader(new InputStreamReader(input));
@@ -89,7 +91,7 @@ public class MessageHandler implements Runnable {
         ByteArrayInputStream input = new ByteArrayInputStream(packet.getData());
         BufferedReader output = new BufferedReader(new InputStreamReader(input));
 
-        String header = "";
+        header = "";
 
         try {
             header += output.readLine();
@@ -104,4 +106,4 @@ public class MessageHandler implements Runnable {
 
         return body;
     }
-};
+}

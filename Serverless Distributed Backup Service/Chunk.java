@@ -2,7 +2,6 @@ import java.util.concurrent.TimeUnit;
 
 public class Chunk implements Comparable {
 
-    private static int MAX_SIZE = 64 * 1000;
     private String ID, fileID;
     private byte[] data;
     private int nr, repDegree, currentRepDegree;
@@ -27,7 +26,7 @@ public class Chunk implements Comparable {
         return repDegree;
     }
 
-    private int getCurrentRepDegree() {
+    int getCurrentRepDegree() {
         return currentRepDegree;
     }
 
@@ -40,7 +39,7 @@ public class Chunk implements Comparable {
     }
 
     static int getMaxSize() {
-        return MAX_SIZE;
+        return 64 * 1000;
     }
 
     String getFileID() {
@@ -50,10 +49,6 @@ public class Chunk implements Comparable {
     //SETS
     void setCurrentRepDegree(int replica) {
         currentRepDegree = replica;
-    }
-
-    public void setRepDegree(int replications) {
-        repDegree = replications;
     }
 
     void backup() {

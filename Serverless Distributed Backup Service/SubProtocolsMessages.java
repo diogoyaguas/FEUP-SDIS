@@ -1,21 +1,22 @@
-import java.util.Random;
-import java.util.ArrayList;
 import java.io.File;
 import java.io.IOException;
-import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Random;
 
 class SubProtocolsMessages {
 
-    //IF ERROR - MAYBE NOT STATIC?
     static void putChunk(String FileId, int ChunkNo, int ReplicationDeg, byte[] Body) {
+
         //PUTCHUNK <Version> <SenderId> <FileId> <ChunkNo> <ReplicationDeg> <CRLF><CRLF><Body>
 
-        System.out.println("\nPUTCHUNK RECEIVED\t");
+        System.out.println("\nPUTCHUNK received\t");
 
         Chunk chunk = new Chunk(ChunkNo, FileId, Body, ReplicationDeg);
 
         //SAVE
-        Peer.getMDB().save(chunk.getID(), 0);
+        Peer.getMDB().save(chunk.getID(), Peer.getPeerID());
 
         Peer.getStorage().addStoredChunk(chunk);
 
@@ -34,9 +35,11 @@ class SubProtocolsMessages {
 
     }
 
-    static void stored(int senderId, String FileId, int ChunkNo) {
+    static void stored(String FileId, int ChunkNo) {
+
         //STORED <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
-        System.out.println("\nSTORED RECEIVED\t");
+
+        System.out.println("\nSTORED received\t");
 
         String chunkId = ChunkNo + "_" + FileId;
         Chunk chunk = new Chunk(ChunkNo, FileId, new byte[0], 0);
@@ -46,38 +49,83 @@ class SubProtocolsMessages {
 
         if (Peer.getStorage().isStoredAlready(chunk))
             //INCREASE REP DEGREE
-            Peer.getStorage().increaseRepDegree(FileId, ChunkNo);
+            Peer.getStorage().increaseRepDegree(ChunkNo);
 
     }
 
     static void delete(String fileId) {
+
         //DELETE <Version> <SenderId> <FileId> <CRLF><CRLF>
-        System.out.println("\nDELETE RECEIVED\t");
+
+        System.out.println("\nDELETE received\t");
 
         Peer.getStorage().deleteStoredChunk(fileId);
 
     }
 
-    static void removed() {
+    static void removed(String FileId, int ChunkNo) {
+
         //REMOVED <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
 
-        System.out.println("REMOVED RECEIVED\t");
+        System.out.println("\nREMOVED received\t");
 
+        Chunk chunk = new Chunk(ChunkNo, FileId, new byte[0], 0);
+
+        HashSet<Chunk> chunks = Peer.getStorage().getStoredChunks();
+
+        if (chunks.contains(chunk)) {
+
+            System.out.println("Contains");
+            Iterator iter = chunks.iterator();
+            Chunk chunk_iter = (Chunk) iter.next();
+            while (true) {
+
+                if (chunk_iter.getID().equals(chunk.getID())) {
+                    chunk = chunk_iter;
+
+                    Peer.getStorage().decreaseRepDegree(ChunkNo);
+                    chunk.setCurrentRepDegree(chunk.getCurrentRepDegree() - 1);
+
+                    if (chunk.getCurrentRepDegree() < chunk.getRepDegree()) {
+
+                        // wait a random delay uniformly distributed between 0 and 400 ms
+                        Random rand = new Random();
+                        int n = rand.nextInt(400) + 1;
+
+                        Peer.getMDB().startingSaving(chunk.getID());
+
+                        try {
+                            Thread.sleep(n);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                        int save = Peer.getMDB().getNumBackups(chunk.getID());
+
+                        System.out.println("SAVES " + save);
+
+                        Peer.getMDB().stopSaving(chunk.getID());
+
+                        if (save == 0)
+                            chunk.backup();
+
+                    }
+                    return;
+                }
+            }
+        }
     }
 
     //R E S T O R E
     static void getchunk(int senderId, String fileId, int ChunkNo) {
+
         //GETCHUNK <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
 
-        System.out.println("GETCHUNK RECEIVED\t");
+        System.out.println("\nGETCHUNK received\t");
 
         File file = new File(Peer.getPeerFolder().getAbsolutePath() + "/backup/" + fileId + "/chk" + ChunkNo);
 
-        System.out.println(file.getAbsolutePath());
-
         Peer.getMDR().startRestore(fileId);
-
-        System.out.println(file.exists());
 
         if (file.exists()) {
             try {
@@ -88,39 +136,39 @@ class SubProtocolsMessages {
                 Random delay = new Random();
                 int n = delay.nextInt(400) + 1;
 
-
                 try {
                     Thread.sleep(n);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
 
-            ArrayList<Chunk> chunks = Peer.getMDR().getRestored(fileId);
+                ArrayList<Chunk> chunks = Peer.getMDR().getRestored(fileId);
 
-            if (chunks != null) {
-                if (!chunks.contains(new Chunk(ChunkNo, fileId, new byte[0], 0)))
-                    Peer.getMessageForwarder().sendChunk(chunk);
+                if (chunks != null) {
+                    if (!chunks.contains(new Chunk(ChunkNo, fileId, new byte[0], 0)))
+                        Peer.getMessageForwarder().sendChunk(chunk);
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
-        } catch(IOException e){
-            e.printStackTrace();
         }
 
+        Peer.getMDR().stopRestore(fileId);
     }
 
-    Peer.getMDR().stopRestore(fileId);
-}
-
     static void chunk(String FileId, int ChunkNo, int repDegree, byte[] Body) {
+
         //CHUNK <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF><Body>
 
-        System.out.println("CHUNK RECEIVED\t");
+        System.out.println("\nCHUNK received\t");
 
         Chunk chunk = new Chunk(ChunkNo, FileId, Body, repDegree);
 
-        if(Peer.getMDR().restoring(FileId)) {
+        if (Peer.getMDR().restoring(FileId)) {
             Peer.getMDR().save(FileId, chunk);
         }
 
     }
-};
+}

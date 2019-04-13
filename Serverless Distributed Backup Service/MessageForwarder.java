@@ -1,4 +1,4 @@
-public class MessageForwarder {
+class MessageForwarder {
     private double protocolVersion;
 
     private static byte CR = 0xD;
@@ -38,7 +38,7 @@ public class MessageForwarder {
     }
 
     // The initiator-peer shall send a message to the MC
-    public void sendGetChunk(int chunk_no, String file_id) {
+    void sendGetChunk(int chunk_no, String file_id) {
         String header = "GETCHUNK" + " " + protocolVersion + " " + Peer.getServerId() + " " + file_id
                 + " " + chunk_no + " " + CRLF + CRLF;
 
@@ -47,7 +47,7 @@ public class MessageForwarder {
     }
 
     // Send the body of a CHUNK message via the MDR channel
-    public void sendChunk(Chunk chunk) {
+    void sendChunk(Chunk chunk) {
         String header = "CHUNK" + " " + protocolVersion + " " + Peer.getServerId() + " " + chunk.getFileID()
                 + " " + chunk.getChunkNr() + " " + chunk.getRepDegree() + " " + CRLF + CRLF;
 
@@ -57,7 +57,7 @@ public class MessageForwarder {
     }
 
     // Chunks should be deleted from the backup service
-    public void sendDelete(String file_id) {
+    void sendDelete(String file_id) {
         String header = "DELETE" + " " + protocolVersion + " " + Peer.getServerId()
                 + " " + file_id + " " + CRLF + CRLF;
 
@@ -65,7 +65,7 @@ public class MessageForwarder {
     }
 
     // Deletes a copy of a chunk it has backed up, sending to the MC channel
-    public void sendRemoved(int chunk_no, String file_id) {
+    void sendRemoved(int chunk_no, String file_id) {
         String header = "REMOVED" + " " + protocolVersion + " " + Peer.getServerId() + " " + file_id
                 + " " + chunk_no + " " + CRLF + CRLF;
 

@@ -38,9 +38,9 @@ class FileData {
 
     }
 
-    static File createFolder(String peerAp) {
+    static File createFolder(String name) {
 
-        File theDir = new File("Files/" + peerAp);
+        File theDir = new File(name);
 
         // if the directory does not exist, create it
         if (!theDir.exists()) {

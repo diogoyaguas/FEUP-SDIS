@@ -1,7 +1,8 @@
+import java.io.File;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.io.*;
 
 public class App {
 
@@ -10,9 +11,11 @@ public class App {
     private App() {
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
 
         try {
+
+            File file = FileData.createFolder("Files");
 
             if (!initializeArgs(args)) return;
 
@@ -29,16 +32,18 @@ public class App {
 
                 case "RESTORE":
                     stub.restore("TestFiles/" + filePath);
+                    System.out.println("\nRestore finished\n");
                     break;
 
                 case "DELETE":
                     stub.delete("TestFiles/" + filePath);
-                    System.out.println("\n" + filePath + "deleted\n");
+                    System.out.println("\nFile deleted\n");
                     break;
 
                 case "RECLAIM":
-                    int size = Integer.parseInt(args[3]);
+                    int size = Integer.parseInt(args[2]);
                     stub.reclaim(size);
+                    System.out.println("\nSpace reclaimed\n");
                     break;
 
                 case "STATE":
@@ -49,13 +54,13 @@ public class App {
                     break;
             }
 
-        } catch (Exception e) {
+        } catch (RemoteException | NotBoundException e) {
             System.err.println("\nApp exception: " + e.toString());
             e.printStackTrace();
         }
     }
 
-    private static boolean initializeArgs(String[] args) throws RemoteException {
+    private static boolean initializeArgs(String[] args) {
 
         if (args.length != 2 && args.length != 3 && args.length != 4) {
 
