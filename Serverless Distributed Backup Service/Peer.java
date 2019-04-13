@@ -233,7 +233,7 @@ public class Peer implements RMI {
                 e.printStackTrace();
             }
 
-            if(Peer.getMDR().getRestored(FileId).isEmpty()) {
+            if (Peer.getMDR().getRestored(FileId).isEmpty()) {
                 System.out.println("\nImpossible to restore this file");
                 return;
             }
@@ -305,18 +305,29 @@ public class Peer implements RMI {
     public void reclaim(int size) {
 
         long spaceUsed = Peer.getStorage().getSpaceUsed();
+        long spaceClaimed = size;
 
         System.out.println("1.Usado: " + spaceUsed);
         System.out.println("1.Livre: " + Peer.getStorage().getSpaceAvailable());
-  
-        if(spaceUsed == 0 ) {
+        System.out.println("1.Preciso: " + spaceClaimed);
+        System.out.println("");
+
+        if (spaceUsed == 0) {
             System.out.println("No space used. Impossible to reclaim space");
             return;
+        } else if (spaceUsed < spaceClaimed) {
+            spaceClaimed = spaceUsed;
         }
+
+        System.out.println("2.Usado: " + spaceUsed);
+        System.out.println("2.Livre: " + Peer.getStorage().getSpaceAvailable());
+        System.out.println("2.Preciso: " + spaceClaimed);
+        System.out.println("");
 
         HashSet<Chunk> chunks = Peer.getStorage().getStoredChunks();
 
         int i = 0;
+        long tempSpace = spaceClaimed;
 
         Iterator iter = chunks.iterator();
 
@@ -327,18 +338,26 @@ public class Peer implements RMI {
 
             iter.remove();
 
-            size -= chunk.getData().length;
+            tempSpace -= chunk.getData().length;
+
+            String fileName = Peer.getPeerFolder().getAbsolutePath() + "/backup/" + chunk.getFileID() + "/chk" + chunk.getChunkNr();
+            File file = new File(fileName);
+            file.delete();
+
+            String folderName = Peer.getPeerFolder().getAbsolutePath() + "/backup/" + chunk.getFileID();
+            File folder = new File(folderName);
+            folder.delete();
 
             i++;
 
-        } while (size > 0 && i < chunks.size());
+        } while (tempSpace > 0 && i < chunks.size());
 
+        Peer.getStorage().reclaimSpace(spaceClaimed);
 
         System.out.println("3.Usado: " + Peer.getStorage().getSpaceUsed());
         System.out.println("3.Livre: " + Peer.getStorage().getSpaceAvailable());
+        System.out.println("3.Preciso: " + spaceClaimed);
         System.out.println("\nSpace reclaimed");
-
-        Peer.getStorage().reclaimSpace(size, 1);
     }
 
     @Override

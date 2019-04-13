@@ -1,8 +1,6 @@
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,7 +11,7 @@ class Storage implements java.io.Serializable {
     private ConcurrentHashMap<String, Integer> storedReps;
     private long spaceAvailable;
     private long spaceUsed;
-    private long MAX_SPACE = 80000;
+    private long MAX_SPACE = 500000;
 
     Storage() {
         this.storedChunks = new HashSet<>();
@@ -40,9 +38,6 @@ class Storage implements java.io.Serializable {
 
         byte[] chunk_data = chunk.getData();
 
-        System.out.println(chunk_data.length);
-
-
         // check if there is enough memory
         long tempSpace = spaceAvailable - chunk_data.length;
 
@@ -52,14 +47,12 @@ class Storage implements java.io.Serializable {
             return;
         }
 
-        // update memory status
-        decreaseSpace(chunk_data.length);
-
         File backupFolder = FileData.createFolder("Files/" + Peer.getPeerFolder().getName() + "/backup");
         File fileFolder = FileData.createFolder("Files/" + Peer.getPeerFolder().getName() + "/backup/" + chunk.getFileID());
 
         FileOutputStream out;
         try {
+
             out = new FileOutputStream(fileFolder.getAbsolutePath() + "/chk" + chunk.getChunkNr());
             out.write(chunk.getData());
             out.close();
@@ -69,6 +62,10 @@ class Storage implements java.io.Serializable {
         }
 
         if (!isStoredAlready(chunk)) {
+
+            // update memory status
+            decreaseSpace(chunk_data.length);
+
             this.storedChunks.add(chunk);
             String key = "chk" + chunk.getChunkNr();
             this.storedReps.put(key, chunk.getRepDegree());
@@ -118,9 +115,9 @@ class Storage implements java.io.Serializable {
         this.storedReps.remove(FileId + '_' + ChunkNr);
     }
 
-    void reclaimSpace(long spaceClaimed, long memoryUsed) {
-        this.spaceAvailable += spaceClaimed - memoryUsed;
-        this.spaceUsed = memoryUsed;
+    void reclaimSpace(long spaceClaimed) {
+        this.spaceAvailable += spaceClaimed;
+        this.spaceUsed -= spaceClaimed;
     }
 
     //INCREASE & DECREASE SPACE
