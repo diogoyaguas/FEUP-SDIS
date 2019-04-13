@@ -49,7 +49,7 @@ class SubProtocolsMessages {
 
         if (Peer.getStorage().isStoredAlready(chunk))
             //INCREASE REP DEGREE
-            Peer.getStorage().increaseRepDegree(ChunkNo);
+            Peer.getStorage().increaseRepDegree(FileId, ChunkNo);
 
     }
 
@@ -67,7 +67,7 @@ class SubProtocolsMessages {
 
         //REMOVED <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
 
-        System.out.println("\nREMOVED received\t");
+   /*     System.out.println("\nREMOVED received\t");
 
         Chunk chunk = new Chunk(ChunkNo, FileId, new byte[0], 0);
 
@@ -83,7 +83,7 @@ class SubProtocolsMessages {
                 if (chunk_iter.getID().equals(chunk.getID())) {
                     chunk = chunk_iter;
 
-                    Peer.getStorage().decreaseRepDegree(ChunkNo);
+                    Peer.getStorage().decreaseRepDegree(FileId, ChunkNo);
                     chunk.setCurrentRepDegree(chunk.getCurrentRepDegree() - 1);
 
                     if (chunk.getCurrentRepDegree() < chunk.getRepDegree()) {
@@ -113,7 +113,7 @@ class SubProtocolsMessages {
                     return;
                 }
             }
-        }
+        }*/
     }
 
     //R E S T O R E

@@ -4,8 +4,20 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 
 class FileData {
+
+    private File file;
+    private int repDegree;
+    //do i need this?
+    private ArrayList<Chunk> chunks;
+
+    public FileData(String path, int repDegree){
+        this.file = new File(path);
+        this.repDegree = repDegree;
+        this.chunks = new ArrayList<>();
+    }
 
     static byte[] loadFile(File file) throws IOException {
         FileInputStream file_is = new FileInputStream(file);
@@ -60,4 +72,7 @@ class FileData {
 
         return theDir;
     }
+
+    public int getReplicationDegree() { return this.repDegree;}
+    public File getFile() { return file;}
 }
