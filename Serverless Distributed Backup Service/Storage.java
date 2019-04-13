@@ -1,8 +1,6 @@
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,11 +13,12 @@ class Storage implements java.io.Serializable {
     private ConcurrentHashMap<String, Integer> storedReps;
     private ConcurrentHashMap<String, String> wantedChunks;
     private int spaceAvailable;
-    private int MAX_SPACE = 1000000000;
+    private long spaceUsed;
+    private int MAX_SPACE = 500000;
 
     public Storage() {
         this.files = new ArrayList<>();
-        this.storedChunks = new ArrayList<>();
+        this.storedChunks = new HashSet<>();
         this.receivedChunks = new ArrayList<>();
         this.storedReps = new ConcurrentHashMap<>();
         this.wantedChunks = new ConcurrentHashMap<>();
@@ -64,11 +63,23 @@ class Storage implements java.io.Serializable {
     //Makes sure the added chunk isn't already there and adds it
     synchronized void addStoredChunk(Chunk chunk) {
 
-        File backupFolder = FileData.createFolder(Peer.getPeerFolder().getName() + "/backup");
-        File fileFolder = FileData.createFolder(Peer.getPeerFolder().getName() + "/backup/" + chunk.getFileID());
+        byte[] chunk_data = chunk.getData();
+
+        // check if there is enough memory
+        long tempSpace = spaceAvailable - chunk_data.length;
+
+        if (tempSpace < 0) {
+            System.out.println("\nChunk can not be stored.");
+            System.out.println("Not enough free memory.");
+            return;
+        }
+
+        File backupFolder = FileData.createFolder("Files/" + Peer.getPeerFolder().getName() + "/backup");
+        File fileFolder = FileData.createFolder("Files/" + Peer.getPeerFolder().getName() + "/backup/" + chunk.getFileID());
 
         FileOutputStream out;
         try {
+
             out = new FileOutputStream(fileFolder.getAbsolutePath() + "/chk" + chunk.getChunkNr());
             out.write(chunk.getData());
             out.close();
@@ -78,6 +89,10 @@ class Storage implements java.io.Serializable {
         }
 
         if (!isStoredAlready(chunk)) {
+
+            // update memory status
+            decreaseSpace(chunk_data.length);
+
             this.storedChunks.add(chunk);
             String key = chunk.getFileID() + '_' + chunk.getChunkNr();
             this.storedReps.put(key, chunk.getRepDegree());
@@ -124,6 +139,11 @@ class Storage implements java.io.Serializable {
     }
     private synchronized void deleteReps(String FileId, int ChunkNr) {
         this.storedReps.remove(FileId + '_' + ChunkNr);
+    }
+
+    void reclaimSpace(long spaceClaimed) {
+        this.spaceAvailable += spaceClaimed;
+        this.spaceUsed -= spaceClaimed;
     }
 
     //INCREASE & DECREASE SPACE
