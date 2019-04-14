@@ -85,7 +85,7 @@ public class App {
             System.out.println(" - BACKUP <fileID> <replicationDegree>\t");
             System.out.println(" - RESTORE <fileID>\t");
             System.out.println(" - DELETE <fileID>\t");
-            System.out.println(" - RECLAIM <fileID> <space>\t");
+            System.out.println(" - RECLAIM <space>\t");
             System.out.println(" - STATE\n");
             return false;
         }
