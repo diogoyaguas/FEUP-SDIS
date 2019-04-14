@@ -1,1 +1,3 @@
 javac *.java
+start rmiregistry
+

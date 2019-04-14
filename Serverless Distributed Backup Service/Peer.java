@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -52,45 +54,14 @@ public class Peer implements RMI {
     }
 
     //GETS
-    static File getPeerFolder() {
-
-        return peerFolder;
-    }
-
-    static int getServerId() {
-
-        return serverId;
-    }
-
-    static int getPeerID() {
-
-        return peerID;
-    }
-
-    static ChannelControl getMC() {
-
-        return MC;
-    }
-
-    static ChannelBackup getMDB() {
-
-        return MDB;
-    }
-
-    static ChannelRestore getMDR() {
-
-        return MDR;
-    }
-
-    static MessageForwarder getMessageForwarder() {
-
-        return messageForwarder;
-    }
-
-    static Storage getStorage() {
-
-        return storage;
-    }
+    static File getPeerFolder() { return peerFolder; }
+    static int getServerId() { return serverId; }
+    static int getPeerID() { return peerID; }
+    static ChannelControl getMC() { return MC; }
+    static ChannelBackup getMDB() { return MDB; }
+    static ChannelRestore getMDR() { return MDR; }
+    static MessageForwarder getMessageForwarder() { return messageForwarder; }
+    static Storage getStorage() { return storage; }
 
     public static void main(String[] args) {
 
@@ -164,8 +135,8 @@ public class Peer implements RMI {
 
     private static void printInfo() {
 
-        System.out.println("\n Version - " + protocolVersion + " | ServerId - " + serverId + " | Access Point - " + peerAp);
-        System.out.println(" MC  " + MCAddress + ":" + MCPort + " | MDB  " + MDBAddress + ":" + MDBPort + " | MDR  " + MDRAddress + ":" + MDRPort);
+        System.out.println("\nVersion - " + protocolVersion + "\nServerId - " + serverId + "\nAccess Point - " + peerAp);
+        System.out.println("MC  " + MCAddress + ":" + MCPort + "\nMDB  " + MDBAddress + ":" + MDBPort + "\nMDR  " + MDRAddress + ":" + MDRPort);
     }
 
     @Override
@@ -231,9 +202,12 @@ public class Peer implements RMI {
             e.printStackTrace();
         }
 
+       // System.out.println("PRINT" + storage.getFileChunks().get(FileId).size());
+
         getMDR().startRestore(FileId);
 
         ArrayList<Chunk> chunks = new ArrayList<>();
+        ArrayList<Chunk> finalChunks = new ArrayList<>();
 
         int i = 0;
         boolean lastChunk = false;
@@ -260,29 +234,37 @@ public class Peer implements RMI {
             if (chunk.getData().length != Chunk.getMaxSize())
                 lastChunk = true;
 
+
             chunks.add(chunk);
             i++;
 
         } while (!lastChunk);
 
-        getMDR().stopRestore(FileId);
-
-        byte[] dataBody = new byte[0];
-        byte[] tmp;
-
-        for (Chunk chunk : chunks) {
-
-            byte[] chunkBody = chunk.getData();
-
-            tmp = new byte[dataBody.length + chunkBody.length];
-            System.arraycopy(dataBody, 0, tmp, 0, dataBody.length);
-            System.arraycopy(chunkBody, 0, tmp, dataBody.length, chunkBody.length);
-
-            dataBody = tmp;
+        for(Chunk storedChunk : chunks){
+            if(!finalChunks.contains(storedChunk))
+                finalChunks.add(storedChunk);
         }
 
-        File restoreFolder = FileData.createFolder("Files/" + Peer.getPeerFolder().getName() + "/restore");
+        getMDR().stopRestore(FileId);
 
+        byte [] dataBody = new byte[0];
+        byte [] tmp = new byte[0];
+
+       for(Chunk chunk : finalChunks) {
+
+           byte[] chunkBody = chunk.getData();
+
+           tmp = new byte[dataBody.length + chunkBody.length];
+           System.arraycopy(dataBody, 0, tmp, 0, dataBody.length);
+           System.arraycopy(chunkBody, 0, tmp, dataBody.length, chunkBody.length);
+
+           dataBody = tmp;
+
+       }
+
+        System.out.println(finalChunks.size());
+
+        File restoreFolder = FileData.createFolder("Files/" + Peer.getPeerFolder().getName() + "/restore");
         FileOutputStream restore;
 
         try {

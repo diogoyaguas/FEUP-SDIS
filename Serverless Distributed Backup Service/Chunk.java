@@ -46,6 +46,15 @@ public class Chunk implements Comparable {
         return fileID;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == null) return false;
+
+        Chunk chunk = (Chunk) obj;
+        return (nr == chunk.getChunkNr() && fileID.equals(chunk.getFileID()));
+
+    }
+
     //SETS
     void setCurrentRepDegree(int replica) {
         currentRepDegree = replica;

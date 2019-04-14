@@ -16,7 +16,7 @@ class Storage implements java.io.Serializable {
     private HashSet<Chunk> storedChunks;
     private ConcurrentHashMap<String, Integer> storedReps;
 
-    private long MAX_SPACE = 500000;
+    private long MAX_SPACE = 1000000000;
     private long spaceAvailable;
     private long spaceUsed;
 
@@ -122,7 +122,6 @@ class Storage implements java.io.Serializable {
             String key = chunk.getFileID() + '_' + chunk.getChunkNr();
             this.storedReps.put(key, chunk.getRepDegree());
         }
-
     }
 
     boolean isStoredAlready(Chunk chunk) {
