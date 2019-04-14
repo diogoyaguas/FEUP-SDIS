@@ -440,8 +440,6 @@ public class Peer implements RMI {
 
         long tempSpace = spaceUsed - spaceClaimed;
 
-        System.out.println(tempSpace);
-
         Iterator iter = chunks.iterator();
 
         do {
