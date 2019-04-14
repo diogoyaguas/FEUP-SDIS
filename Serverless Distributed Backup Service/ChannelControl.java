@@ -17,12 +17,4 @@ class ChannelControl extends Channel {
             stored.put(chunkID, new ArrayList<>());
     }
 
-    synchronized int getNumStoredConfirmsFor(String chunkID) {
-        return stored.get(chunkID).size();
-    }
-
-    synchronized void stopSavingStoredConfirmsFor(String chunkID) {
-        stored.remove(chunkID);
-    }
-
 }

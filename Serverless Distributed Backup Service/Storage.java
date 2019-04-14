@@ -3,7 +3,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,12 +12,13 @@ class Storage implements java.io.Serializable {
     private HashMap<String, Integer> desiredReplicationDegree;
     private HashMap<String, ArrayList<Chunk>> fileChunks;
 
-    private HashSet<Chunk> storedChunks;
+    private ArrayList<Chunk> storedChunks;
     private ConcurrentHashMap<String, Integer> storedReps;
 
     private long MAX_SPACE = 1000000000;
     private long spaceAvailable;
     private long spaceUsed;
+    private long totalSpace;
 
     Storage() {
 
@@ -26,11 +26,12 @@ class Storage implements java.io.Serializable {
         this.desiredReplicationDegree = new HashMap<>();
         this.fileChunks = new HashMap<>();
 
-        this.storedChunks = new HashSet<>();
+        this.storedChunks = new ArrayList<>();
         this.storedReps = new ConcurrentHashMap<>();
 
         this.spaceAvailable = MAX_SPACE;
         this.spaceUsed = 0;
+        this.totalSpace = spaceAvailable + spaceUsed;
     }
 
     //GETS
@@ -49,14 +50,9 @@ class Storage implements java.io.Serializable {
         return fileChunks;
     }
 
-    HashSet<Chunk> getStoredChunks() {
+    ArrayList<Chunk> getStoredChunks() {
 
         return storedChunks;
-    }
-
-    ConcurrentHashMap<String, Integer> getStoredReps() {
-
-        return storedReps;
     }
 
     long getSpaceAvailable() {
@@ -66,7 +62,7 @@ class Storage implements java.io.Serializable {
 
     long getOccupiedSpace() {
 
-        spaceUsed = MAX_SPACE - getSpaceAvailable();
+        spaceUsed = totalSpace - spaceAvailable;
         return spaceUsed;
     }
 
@@ -184,14 +180,15 @@ class Storage implements java.io.Serializable {
 
     void reclaimSpace(long spaceClaimed, long spaceUsed) {
 
+        this.totalSpace = spaceClaimed;
         this.spaceAvailable = spaceClaimed - spaceUsed;
         this.spaceUsed = spaceUsed;
     }
 
     //INCREASE & DECREASE SPACE
-    private synchronized void decreaseSpace(int ChunkSize) {
+    private synchronized void decreaseSpace(int chunkSize) {
 
-        spaceAvailable -= ChunkSize;
+        spaceAvailable -= chunkSize;
     }
 
     private synchronized void freeSpace(String FileId, int ChunkNr) {
@@ -216,4 +213,5 @@ class Storage implements java.io.Serializable {
         int total = this.storedReps.get(key) + 1;
         this.storedReps.replace(key, total);
     }
+
 }

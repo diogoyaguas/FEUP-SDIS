@@ -69,53 +69,54 @@ class SubProtocolsMessages {
 
         System.out.println("\nREMOVED received\t");
 
-        HashSet<Chunk> chunks = Peer.getStorage().getStoredChunks();
+        ArrayList<Chunk> chunks = Peer.getStorage().getStoredChunks();
 
-        Iterator iter = chunks.iterator();
-        Chunk chunk_iter = (Chunk) iter.next();
+        if (chunks.isEmpty()) return;
+
         Chunk chunk = new Chunk(ChunkNo, FileId, new byte[0], 0);
 
-        if (chunk_iter.getFileID().equals(FileId) && chunk_iter.getChunkNr() == ChunkNo) {
-            while (true) {
+        for (Chunk value : chunks) {
 
-                if (chunk_iter.getID().equals(chunk.getID())) {
-                    chunk = chunk_iter;
+            if (value.getFileID().equals(FileId) && value.getChunkNr() == ChunkNo) {
+                while (true) {
 
-                    Peer.getStorage().decreaseRepDegree(FileId, ChunkNo);
-                    chunk.setCurrentRepDegree(chunk.getCurrentRepDegree() - 1);
+                    if (value.getID().equals(chunk.getID())) {
+                        chunk = value;
 
-                    if (chunk.getCurrentRepDegree() < chunk.getRepDegree()) {
+                        Peer.getStorage().decreaseRepDegree(FileId, ChunkNo);
 
-                        // wait a random delay uniformly distributed between 0 and 400 ms
-                        Random rand = new Random();
-                        int n = rand.nextInt(400) + 1;
+                        if (chunk.getCurrentRepDegree() < chunk.getRepDegree()) {
 
-                        Peer.getMDB().startingSaving(chunk.getID());
+                            // wait a random delay uniformly distributed between 0 and 400 ms
+                            Random rand = new Random();
+                            int n = rand.nextInt(400) + 1;
 
-                        try {
-                            Thread.sleep(n);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            Peer.getMDB().startingSaving(chunk.getID());
+
+                            try {
+                                Thread.sleep(n);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+
+                            int save = Peer.getMDB().getNumBackups(chunk.getID());
+
+                            Peer.getMDB().stopSaving(chunk.getID());
+
+                            if (save == 0)
+                                chunk.backup();
+
                         }
 
-                        int save = Peer.getMDB().getNumBackups(chunk.getID());
-
-                        Peer.getMDB().stopSaving(chunk.getID());
-
-                        if (save == 0)
-                            chunk.backup();
-
+                        return;
                     }
-                    return;
                 }
             }
         }
-
     }
 
-
     //R E S T O R E
-    static void getchunk(int senderId, String fileId, int ChunkNo) {
+    static void getchunk(String fileId, int ChunkNo) {
 
         //GETCHUNK <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
 
