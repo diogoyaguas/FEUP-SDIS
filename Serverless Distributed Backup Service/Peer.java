@@ -202,8 +202,6 @@ public class Peer implements RMI {
             e.printStackTrace();
         }
 
-       // System.out.println("PRINT" + storage.getFileChunks().get(FileId).size());
-
         getMDR().startRestore(FileId);
 
         ArrayList<Chunk> chunks = new ArrayList<>();
