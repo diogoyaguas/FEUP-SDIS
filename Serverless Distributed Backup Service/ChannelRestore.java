@@ -33,7 +33,6 @@ class ChannelRestore extends Channel {
     }
 
     void save(String FileId, Chunk chunk) {
-
         if (restored.containsKey(FileId))
             restored.get(FileId).add(chunk);
     }

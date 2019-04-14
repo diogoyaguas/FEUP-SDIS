@@ -326,17 +326,15 @@ public class Peer implements RMI {
         long spaceUsed = Peer.getStorage().getOccupiedSpace();
         long spaceClaimed = size * 1000;
 
-        if (spaceUsed == 0) {
-            System.out.println("No space used. Impossible to reclaim space");
+        if (spaceUsed <= spaceClaimed) {
+            storage.reclaimSpace(spaceClaimed, spaceUsed);
             return;
-        } else if (spaceUsed < spaceClaimed) {
-            spaceClaimed = spaceUsed;
         }
 
         HashSet<Chunk> chunks = Peer.getStorage().getStoredChunks();
 
         int i = 0;
-        long tempSpace = spaceClaimed;
+        long tempSpace = spaceUsed - spaceClaimed;
 
         Iterator iter = chunks.iterator();
 
@@ -361,7 +359,7 @@ public class Peer implements RMI {
 
         } while (tempSpace > 0 && i < chunks.size());
 
-        Peer.getStorage().reclaimSpace(spaceClaimed);
+        Peer.getStorage().reclaimSpace(spaceClaimed, 1);
 
     }
 
@@ -413,11 +411,10 @@ public class Peer implements RMI {
             System.out.println("\t\tChunk ID - " + chunk.getID() + "\t");
 
             //Size (in KB)
-            System.out.println("\t\tChunk Size - " + chunk.getData().length + " KB \t");
+            System.out.println("\t\tChunk Size - " + (chunk.getData().length / 1000) + " KB \t");
 
             //Perceived replication degree
-            String key = chunk.getFileID() + '_' + chunk.getChunkNr();
-            System.out.println("\t\tChunk Replication Degree - " + storage.getStoredReps().get(key) + "\t");
+            System.out.println("\t\tChunk Replication Degree - " + chunk.getRepDegree() + "\t");
 
             i++;
         }

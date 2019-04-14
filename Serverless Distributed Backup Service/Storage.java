@@ -183,10 +183,10 @@ class Storage implements java.io.Serializable {
         this.storedReps.remove(FileId + '_' + ChunkNr);
     }
 
-    void reclaimSpace(long spaceClaimed) {
+    void reclaimSpace(long spaceClaimed, long spaceUsed) {
 
-        this.spaceAvailable += spaceClaimed;
-        this.spaceUsed -= spaceClaimed;
+        this.spaceAvailable = spaceClaimed - spaceUsed;
+        this.spaceUsed = spaceUsed;
     }
 
     //INCREASE & DECREASE SPACE

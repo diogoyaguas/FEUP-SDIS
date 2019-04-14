@@ -100,8 +100,6 @@ class SubProtocolsMessages {
 
                         int save = Peer.getMDB().getNumBackups(chunk.getID());
 
-                        System.out.println("SAVES " + save);
-
                         Peer.getMDB().stopSaving(chunk.getID());
 
                         if (save == 0)
@@ -112,6 +110,7 @@ class SubProtocolsMessages {
                 }
             }
         }
+
     }
 
 
