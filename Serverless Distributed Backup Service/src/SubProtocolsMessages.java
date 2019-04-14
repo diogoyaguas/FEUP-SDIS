@@ -23,9 +23,6 @@ class SubProtocolsMessages {
 
         Chunk chunk = new Chunk(ChunkNo, fileID, Body, ReplicationDeg);
 
-        //SAVE
-        Peer.getMDB().save(chunk.getID(), Peer.getPeerID());
-
         Peer.getStorage().addStoredChunk(chunk);
 
         Peer.getMDB().startingSaving(chunk.getID());
@@ -49,13 +46,16 @@ class SubProtocolsMessages {
      * @param fileID
      * @param ChunkNo
      */
-    static void stored(String fileID, int ChunkNo) {
+    static void stored(String fileID, int ChunkNo, int serverID) {
 
         //STORED <Version> <SenderId> <fileID> <ChunkNo> <CRLF><CRLF>
 
         System.out.println("\nSTORED received\t");
 
         Chunk chunk = new Chunk(ChunkNo, fileID, new byte[0], 0);
+
+        //SAVE
+        Peer.getMDB().save(chunk.getID(), serverID);
 
         if (Peer.getStorage().isStoredAlready(chunk))
             //INCREASE REP DEGREE

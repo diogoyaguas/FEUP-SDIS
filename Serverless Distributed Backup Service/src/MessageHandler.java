@@ -47,7 +47,7 @@ public class MessageHandler implements Runnable {
 
             case "STORED":
                 chunkNr = Integer.parseInt(parsedHeader[4]);
-                SubProtocolsMessages.stored(fileId, chunkNr);
+                SubProtocolsMessages.stored(fileId, chunkNr, serverID);
                 break;
 
             case "DELETE":
