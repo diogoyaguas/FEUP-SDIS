@@ -2,10 +2,29 @@ import java.util.concurrent.TimeUnit;
 
 public class Chunk implements Comparable {
 
+    /**
+     * Chunk ID and File ID
+     */
     private String ID, fileID;
+
+    /**
+     * Information saved
+     */
     private byte[] data;
+
+    /**
+     * Chunk number, replication degree and current replication degree
+     */
     private int nr, repDegree, currentRepDegree;
 
+    /**
+     * Instantiates a new Chunk.
+     *
+     * @param nr        Number of the chunk
+     * @param fileID    File ID
+     * @param data      Information to be saved
+     * @param repDegree Replication Degree
+     */
     Chunk(int nr, String fileID, byte[] data, int repDegree) {
 
         this.nr = nr;
@@ -17,49 +36,70 @@ public class Chunk implements Comparable {
 
     }
 
-    //GETS
+    /**
+     * Get chunk number
+     */
     int getChunkNr() {
         return nr;
     }
 
+    /**
+     * Get replication degree
+     */
     int getRepDegree() {
         return repDegree;
     }
 
+    /**
+     * Get current replication degree
+     */
     int getCurrentRepDegree() {
         return currentRepDegree;
     }
 
+    /**
+     * Get information saved
+     */
     byte[] getData() {
         return data;
     }
 
+    /**
+     * Get chunk ID
+     */
     String getID() {
         return ID;
     }
 
+    /**
+     * Get chunk max size
+     */
     static int getMaxSize() {
         return 64 * 1000;
     }
 
+    /**
+     * Get chunk file ID
+     */
     String getFileID() {
         return fileID;
     }
 
+    /**
+     * Compare chunks
+     */
     @Override
     public boolean equals(Object obj) {
-        if(obj == null) return false;
+        if (obj == null) return false;
 
         Chunk chunk = (Chunk) obj;
         return (nr == chunk.getChunkNr() && fileID.equals(chunk.getFileID()));
 
     }
 
-    //SETS
-    void setCurrentRepDegree(int replica) {
-        currentRepDegree = replica;
-    }
-
+    /**
+     * Backup a chunk
+     */
     void backup() {
 
         long wait_time = 1;
@@ -86,6 +126,9 @@ public class Chunk implements Comparable {
         Peer.getMDB().stopSaving(this.ID);
     }
 
+    /**
+     * Compare the chunks replication degree
+     */
     @Override
     public int compareTo(Object c) {
         return getCurrentRepDegree() - ((Chunk) c).getCurrentRepDegree();

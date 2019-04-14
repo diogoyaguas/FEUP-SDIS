@@ -1,12 +1,18 @@
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Random;
 
 class SubProtocolsMessages {
 
+    /**
+     * Process a put chunk message
+     *
+     * @param FileId
+     * @param ChunkNo
+     * @param ReplicationDeg
+     * @param Body
+     */
     static void putChunk(String FileId, int ChunkNo, int ReplicationDeg, byte[] Body) {
 
         //PUTCHUNK <Version> <SenderId> <FileId> <ChunkNo> <ReplicationDeg> <CRLF><CRLF><Body>
@@ -35,6 +41,12 @@ class SubProtocolsMessages {
 
     }
 
+    /**
+     * Process a stored message
+     *
+     * @param FileId
+     * @param ChunkNo
+     */
     static void stored(String FileId, int ChunkNo) {
 
         //STORED <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
@@ -44,15 +56,17 @@ class SubProtocolsMessages {
         String chunkId = ChunkNo + "_" + FileId;
         Chunk chunk = new Chunk(ChunkNo, FileId, new byte[0], 0);
 
-        //SAVE
-        Peer.getMC().startSavingStoredConfirmsFor(chunkId);
-
         if (Peer.getStorage().isStoredAlready(chunk))
             //INCREASE REP DEGREE
             Peer.getStorage().increaseRepDegree(FileId, ChunkNo);
 
     }
 
+    /**
+     * Process a delete message
+     *
+     * @param fileId
+     */
     static void delete(String fileId) {
 
         //DELETE <Version> <SenderId> <FileId> <CRLF><CRLF>
@@ -63,6 +77,12 @@ class SubProtocolsMessages {
 
     }
 
+    /**
+     * Process a removed message
+     *
+     * @param FileId
+     * @param ChunkNo
+     */
     static void removed(String FileId, int ChunkNo) {
 
         //REMOVED <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
@@ -115,7 +135,12 @@ class SubProtocolsMessages {
         }
     }
 
-    //R E S T O R E
+    /**
+     * Process a get chunk message
+     *
+     * @param fileId
+     * @param ChunkNo
+     */
     static void getchunk(String fileId, int ChunkNo) {
 
         //GETCHUNK <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
@@ -157,6 +182,14 @@ class SubProtocolsMessages {
         Peer.getMDR().stopRestore(fileId);
     }
 
+    /**
+     * Process a chunk received message
+     *
+     * @param FileId
+     * @param ChunkNo
+     * @param repDegree
+     * @param Body
+     */
     static void chunk(String FileId, int ChunkNo, int repDegree, byte[] Body) {
 
         //CHUNK <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF><Body>

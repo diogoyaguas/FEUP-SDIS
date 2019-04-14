@@ -9,10 +9,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
-import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -20,26 +17,73 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Peer implements RMI {
 
+    /**
+     * The protocol version being executed
+     */
     private static double protocolVersion;
+
+    /**
+     * The server ID
+     */
     private static int serverId;
+
+    /**
+     * The RMI access point for client communication
+     */
     private static String peerAp;
 
+    /**
+     * Channels addresses
+     */
     private static InetAddress MCAddress, MDBAddress, MDRAddress;
+
+    /**
+     * Channels ports
+     */
     private static int MCPort, MDBPort, MDRPort;
 
+    /**
+     * Backup channel
+     */
     private static ChannelBackup MDB;
+
+    /**
+     * Control channel
+     */
     private static ChannelControl MC;
+
+    /**
+     * Restore channel
+     */
     private static ChannelRestore MDR;
+
     private static ScheduledThreadPoolExecutor exec;
+
+    /**
+     * Storage
+     */
     private static Storage storage;
 
     private static final AtomicInteger count = new AtomicInteger(0);
+
+    /**
+     * The peer's identifier
+     */
     private static int peerID;
+
+    /**
+     * Peer Folder
+     */
     private static File peerFolder;
 
+    /**
+     * Message Forwarder
+     */
     private static MessageForwarder messageForwarder;
 
-
+    /**
+     * Constructor. Initiates peer from CLI args
+     */
     private Peer() {
         peerID = count.incrementAndGet();
 
@@ -53,15 +97,61 @@ public class Peer implements RMI {
         MDR = new ChannelRestore(MDRAddress, MDRPort);
     }
 
-    //GETS
-    static File getPeerFolder() { return peerFolder; }
-    static int getServerId() { return serverId; }
-    static int getPeerID() { return peerID; }
-    static ChannelControl getMC() { return MC; }
-    static ChannelBackup getMDB() { return MDB; }
-    static ChannelRestore getMDR() { return MDR; }
-    static MessageForwarder getMessageForwarder() { return messageForwarder; }
-    static Storage getStorage() { return storage; }
+    /**
+     * Get Peer folder
+     */
+    static File getPeerFolder() {
+        return peerFolder;
+    }
+
+    /**
+     * Get server ID
+     */
+    static int getServerId() {
+        return serverId;
+    }
+
+    /**
+     * Get Peer ID
+     */
+    static int getPeerID() {
+        return peerID;
+    }
+
+    /**
+     * Get control channel
+     */
+    static ChannelControl getMC() {
+        return MC;
+    }
+
+    /**
+     * Get backup channel
+     */
+    static ChannelBackup getMDB() {
+        return MDB;
+    }
+
+    /**
+     * Get restore channel
+     */
+    static ChannelRestore getMDR() {
+        return MDR;
+    }
+
+    /**
+     * Get message forwarder
+     */
+    static MessageForwarder getMessageForwarder() {
+        return messageForwarder;
+    }
+
+    /**
+     * Get Peer storage
+     */
+    static Storage getStorage() {
+        return storage;
+    }
 
     public static void main(String[] args) {
 
@@ -94,6 +184,12 @@ public class Peer implements RMI {
 
     }
 
+    /**
+     * Checks if peer arguments are correct
+     *
+     * @param args args to be checked
+     * @return true if args are correct, false otherwise
+     */
     private static boolean initializeArgs(String[] args) throws UnknownHostException {
 
         if (args.length != 3 && args.length != 9) {
@@ -133,12 +229,21 @@ public class Peer implements RMI {
         return true;
     }
 
+    /**
+     * Print usage to show an user how to properly start a peer
+     */
     private static void printInfo() {
 
         System.out.println("\nVersion - " + protocolVersion + "\nServerId - " + serverId + "\nAccess Point - " + peerAp);
         System.out.println("MC  " + MCAddress + ":" + MCPort + "\nMDB  " + MDBAddress + ":" + MDBPort + "\nMDR  " + MDRAddress + ":" + MDRPort);
     }
 
+    /**
+     * Backup file service.
+     *
+     * @param filepath          the file path
+     * @param replicationDegree the desired replication degree
+     */
     @Override
     public void backup(String filepath, int replicationDegree) {
 
@@ -189,6 +294,11 @@ public class Peer implements RMI {
         }
     }
 
+    /**
+     * Restore file service.
+     *
+     * @param filepath the file path
+     */
     @Override
     public void restore(String filepath) {
 
@@ -202,7 +312,7 @@ public class Peer implements RMI {
             e.printStackTrace();
         }
 
-       // System.out.println("PRINT" + storage.getFileChunks().get(FileId).size());
+        // System.out.println("PRINT" + storage.getFileChunks().get(FileId).size());
 
         getMDR().startRestore(FileId);
 
@@ -240,27 +350,27 @@ public class Peer implements RMI {
 
         } while (!lastChunk);
 
-        for(Chunk storedChunk : chunks){
-            if(!finalChunks.contains(storedChunk))
+        for (Chunk storedChunk : chunks) {
+            if (!finalChunks.contains(storedChunk))
                 finalChunks.add(storedChunk);
         }
 
         getMDR().stopRestore(FileId);
 
-        byte [] dataBody = new byte[0];
-        byte [] tmp = new byte[0];
+        byte[] dataBody = new byte[0];
+        byte[] tmp = new byte[0];
 
-       for(Chunk chunk : finalChunks) {
+        for (Chunk chunk : finalChunks) {
 
-           byte[] chunkBody = chunk.getData();
+            byte[] chunkBody = chunk.getData();
 
-           tmp = new byte[dataBody.length + chunkBody.length];
-           System.arraycopy(dataBody, 0, tmp, 0, dataBody.length);
-           System.arraycopy(chunkBody, 0, tmp, dataBody.length, chunkBody.length);
+            tmp = new byte[dataBody.length + chunkBody.length];
+            System.arraycopy(dataBody, 0, tmp, 0, dataBody.length);
+            System.arraycopy(chunkBody, 0, tmp, dataBody.length, chunkBody.length);
 
-           dataBody = tmp;
+            dataBody = tmp;
 
-       }
+        }
 
         System.out.println(finalChunks.size());
 
@@ -280,6 +390,11 @@ public class Peer implements RMI {
         System.out.println("\nRestore finished");
     }
 
+    /**
+     * Delete file service.
+     *
+     * @param filepath the file path
+     */
     @Override
     public void delete(String filepath) {
 
@@ -302,6 +417,11 @@ public class Peer implements RMI {
 
     }
 
+    /**
+     * Reclaim space service.
+     *
+     * @param size new value for reserved peer storage space
+     */
     @Override
     public void reclaim(int size) {
 
@@ -350,6 +470,9 @@ public class Peer implements RMI {
 
     }
 
+    /**
+     * Retrieve state service.
+     */
     @Override
     public void state() {
 

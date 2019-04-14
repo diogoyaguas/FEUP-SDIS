@@ -14,10 +14,18 @@ public class MessageHandler implements Runnable {
     private int chunkNr, repDegree;
     private static String header = "";
 
+    /**
+     * Instantiates a new message handler.
+     *
+     * @param packet Packet with all the information
+     */
     MessageHandler(DatagramPacket packet) {
         this.packet = packet;
     }
 
+    /**
+     * Method ran when thread starts executing. Process message and execute.
+     */
     @Override
     public void run() {
 
@@ -68,7 +76,11 @@ public class MessageHandler implements Runnable {
 
     }
 
-    //PARSE MESSAGE
+    /**
+     * Process a message header.
+     *
+     * @param packet Packet to process
+     */
     private String[] parseHeader(DatagramPacket packet) {
 
         header = "";
@@ -86,6 +98,11 @@ public class MessageHandler implements Runnable {
         return header.split(" ");
     }
 
+    /**
+     * Process a message body.
+     *
+     * @param packet Packet to process
+     */
     private static byte[] parseBody(DatagramPacket packet) {
 
         ByteArrayInputStream input = new ByteArrayInputStream(packet.getData());

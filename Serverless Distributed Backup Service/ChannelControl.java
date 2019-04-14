@@ -1,20 +1,15 @@
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
 
 class ChannelControl extends Channel {
 
-    private volatile ConcurrentHashMap<String, ArrayList<Integer>> stored;
-
+    /**
+     * Instantiates a new Channel Control.
+     *
+     * @param address the address
+     * @param port    the port
+     */
     ChannelControl(InetAddress address, int port) {
         super(address, port);
-
-        stored = new ConcurrentHashMap<>();
-    }
-
-    synchronized void startSavingStoredConfirmsFor(String chunkID) {
-        if (!stored.containsKey(chunkID))
-            stored.put(chunkID, new ArrayList<>());
     }
 
 }

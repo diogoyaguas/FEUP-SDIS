@@ -6,10 +6,20 @@ import java.rmi.registry.Registry;
 
 public class App {
 
-    private static String peerAp, subProtocol, filePath;
+    /**
+     * The host's remote name where the app will run
+     */
+    private static String peerAp;
 
-    private App() {
-    }
+    /**
+     * The subprotocol that the app will run
+     */
+    private static String subProtocol;
+
+    /**
+     * The file path that the app will run
+     */
+    private static String filePath;
 
     public static void main(String[] args) {
 
@@ -60,6 +70,12 @@ public class App {
         }
     }
 
+    /**
+     * Checks if peer arguments are correct
+     *
+     * @param args args to be checked
+     * @return true if args are correct, false otherwise
+     */
     private static boolean initializeArgs(String[] args) {
 
         if (args.length != 2 && args.length != 3 && args.length != 4) {

@@ -8,6 +8,11 @@ import java.security.NoSuchAlgorithmException;
 
 class FileData {
 
+    /**
+     * Load all information from a File
+     *
+     * @param file File
+     */
     static byte[] loadFile(File file) throws IOException {
 
         try {
@@ -25,6 +30,11 @@ class FileData {
         }
     }
 
+    /**
+     * Get file identifier for the backup service
+     *
+     * @param file File
+     */
     static String getFileId(File file) throws NoSuchAlgorithmException {
 
         String file_id = file.getName() + file.lastModified() + Peer.getServerId();
@@ -45,6 +55,11 @@ class FileData {
 
     }
 
+    /**
+     * Create a folder
+     *
+     * @param name name of the folder
+     */
     static File createFolder(String name) {
 
         File theDir = new File(name);

@@ -6,8 +6,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Peer storage, where the peer's state is kept
+ */
 class Storage implements java.io.Serializable {
 
+    /**
+     * Peer's files that are backup
+     */
     private HashMap<String, File> files;
     private HashMap<String, Integer> desiredReplicationDegree;
     private HashMap<String, ArrayList<Chunk>> fileChunks;
@@ -16,10 +22,25 @@ class Storage implements java.io.Serializable {
     private ConcurrentHashMap<String, Integer> storedReps;
 
     private long MAX_SPACE = 1000000000;
+
+    /**
+     * Currently used space for backing chunks
+     */
     private long spaceAvailable;
+
+    /**
+     * Currently used space for backing chunks
+     */
     private long spaceUsed;
+
+    /**
+     * Peer total space
+     */
     private long totalSpace;
 
+    /**
+     * Initiates the file system manager
+     */
     Storage() {
 
         this.files = new HashMap<>();
@@ -34,7 +55,7 @@ class Storage implements java.io.Serializable {
         this.totalSpace = spaceAvailable + spaceUsed;
     }
 
-    //GETS
+
     HashMap<String, File> getFiles() {
 
         return files;
@@ -66,22 +87,44 @@ class Storage implements java.io.Serializable {
         return spaceUsed;
     }
 
-    //ADDS
+    /**
+     * Saves a file locally
+     *
+     * @param fileID the file ID to save the file
+     * @param file   the file
+     */
     void addFile(String fileID, File file) {
 
         files.put(fileID, file);
     }
 
+    /**
+     * Saves a desired replication degree
+     *
+     * @param fileID            the file ID to save the file
+     * @param replicationDegree the replication degree
+     */
     void addDesiredReplicationDegree(String fileID, int replicationDegree) {
 
         desiredReplicationDegree.put(fileID, replicationDegree);
     }
 
-    void addChunks(String file_id, ArrayList<Chunk> storedChuncks) {
+    /**
+     * Saves chunks
+     *
+     * @param fileID        the file ID to save the file
+     * @param storedChuncks the chunks
+     */
+    void addChunks(String fileID, ArrayList<Chunk> storedChuncks) {
 
-        fileChunks.put(file_id, storedChuncks);
+        fileChunks.put(fileID, storedChuncks);
     }
 
+    /**
+     * Tries to store a chunk
+     *
+     * @param chunk the chunk to store
+     */
     synchronized void addStoredChunk(Chunk chunk) {
 
         byte[] chunk_data = chunk.getData();
@@ -120,6 +163,11 @@ class Storage implements java.io.Serializable {
         }
     }
 
+    /**
+     * Verify if chunks is already stored
+     *
+     * @param chunk the chunk to store
+     */
     boolean isStoredAlready(Chunk chunk) {
 
         for (Chunk stored : this.storedChunks) {
@@ -130,54 +178,84 @@ class Storage implements java.io.Serializable {
         return false;
     }
 
-    //DELETES
-    void deleteFile(String file_id) {
+    /**
+     * Delete file
+     *
+     * @param fileID File ID
+     */
+    void deleteFile(String fileID) {
 
-        files.remove(file_id);
+        files.remove(fileID);
     }
 
-    void deleteDesiredReplicationDegree(String file_id) {
+    /**
+     * Delete desired replication degree
+     *
+     * @param fileID File ID
+     */
+    void deleteDesiredReplicationDegree(String fileID) {
 
-        desiredReplicationDegree.remove(file_id);
+        desiredReplicationDegree.remove(fileID);
     }
 
-    void deleteFileChunks(String file_id) {
+    /**
+     * Delete all file chunks
+     *
+     * @param fileID File ID
+     */
+    void deleteFileChunks(String fileID) {
 
-        fileChunks.remove(file_id);
+        fileChunks.remove(fileID);
     }
 
-    void deleteStoredChunk(String FileId) {
+    /**
+     * Delete stored chunks
+     *
+     * @param fileID File ID
+     */
+    void deleteStoredChunk(String fileID) {
 
         for (Iterator<Chunk> it = this.storedChunks.iterator(); it.hasNext(); ) {
 
             Chunk stored = it.next();
 
-            if (stored.getFileID().equals(FileId)) {
-                String fileName = Peer.getPeerFolder().getAbsolutePath() + "/backup/" + FileId + "/chk" + stored.getChunkNr();
+            if (stored.getFileID().equals(fileID)) {
+                String fileName = Peer.getPeerFolder().getAbsolutePath() + "/backup/" + fileID + "/chk" + stored.getChunkNr();
                 File file = new File(fileName);
                 file.delete();
 
                 //removeReps
-                deleteReps(FileId, stored.getChunkNr());
+                deleteReps(fileID, stored.getChunkNr());
 
                 //freeSpace
-                freeSpace(FileId, stored.getChunkNr());
+                freeSpace(fileID, stored.getChunkNr());
 
                 it.remove();
             }
         }
 
-        String folderName = Peer.getPeerFolder().getAbsolutePath() + "/backup/" + FileId;
+        String folderName = Peer.getPeerFolder().getAbsolutePath() + "/backup/" + fileID;
         File folder = new File(folderName);
         folder.delete();
 
     }
 
-    private synchronized void deleteReps(String FileId, int ChunkNr) {
+    /**
+     * Delete stored replications degrees
+     *
+     * @param fileID File ID
+     */
+    private synchronized void deleteReps(String fileID, int ChunkNr) {
 
-        this.storedReps.remove(FileId + '_' + ChunkNr);
+        this.storedReps.remove(fileID + '_' + ChunkNr);
     }
 
+    /**
+     * Reclaim space
+     *
+     * @param spaceClaimed space to be claimed
+     * @param spaceUsed    space used
+     */
     void reclaimSpace(long spaceClaimed, long spaceUsed) {
 
         this.totalSpace = spaceClaimed;
@@ -185,31 +263,52 @@ class Storage implements java.io.Serializable {
         this.spaceUsed = spaceUsed;
     }
 
-    //INCREASE & DECREASE SPACE
+    /**
+     * Decrease available space
+     *
+     * @param chunkSize Size of chunk
+     */
     private synchronized void decreaseSpace(int chunkSize) {
 
         spaceAvailable -= chunkSize;
     }
 
-    private synchronized void freeSpace(String FileId, int ChunkNr) {
+    /**
+     * Free space
+     *
+     * @param fileID  File ID
+     * @param ChunkNr Chunk Number
+     */
+    private synchronized void freeSpace(String fileID, int ChunkNr) {
 
         for (Chunk stored : this.storedChunks) {
-            if (stored.getFileID().equals(FileId) && stored.getChunkNr() == ChunkNr)
+            if (stored.getFileID().equals(fileID) && stored.getChunkNr() == ChunkNr)
                 spaceAvailable += stored.getData().length;
         }
     }
 
-    //DECREASE & INCREASE REP DEGREE
-    synchronized void decreaseRepDegree(String FileId, int ChunkNr) {
+    /**
+     * Decrease replication degree
+     *
+     * @param fileID  File ID
+     * @param ChunkNr Chunk Number
+     */
+    synchronized void decreaseRepDegree(String fileID, int ChunkNr) {
 
-        String key = FileId + '_' + ChunkNr;
+        String key = fileID + '_' + ChunkNr;
         int total = this.storedReps.get(key) - 1;
         this.storedReps.replace(key, total);
     }
 
-    synchronized void increaseRepDegree(String FileId, int ChunkNr) {
+    /**
+     * Increase replication degree
+     *
+     * @param fileID  File ID
+     * @param ChunkNr Chunk Number
+     */
+    synchronized void increaseRepDegree(String fileID, int ChunkNr) {
 
-        String key = FileId + '_' + ChunkNr;
+        String key = fileID + '_' + ChunkNr;
         int total = this.storedReps.get(key) + 1;
         this.storedReps.replace(key, total);
     }
