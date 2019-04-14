@@ -200,10 +200,10 @@ public class Peer implements RMI {
             MCAddress = InetAddress.getByName("224.0.0.0");
             MCPort = 8000;
 
-            MDBAddress = InetAddress.getByName("224.0.0.0");
+            MDBAddress = InetAddress.getByName("225.0.0.0");
             MDBPort = 8001;
 
-            MDRAddress = InetAddress.getByName("224.0.0.0");
+            MDRAddress = InetAddress.getByName("226.0.0.0");
             MDRPort = 8002;
 
         } else { //User specify values
