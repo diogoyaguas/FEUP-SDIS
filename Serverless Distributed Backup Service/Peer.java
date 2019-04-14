@@ -371,8 +371,6 @@ public class Peer implements RMI {
 
         }
 
-        System.out.println(finalChunks.size());
-
         File restoreFolder = FileData.createFolder("Files/" + Peer.getPeerFolder().getName() + "/restore");
         FileOutputStream restore;
 
