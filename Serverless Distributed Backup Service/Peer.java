@@ -331,10 +331,11 @@ public class Peer implements RMI {
             return;
         }
 
-        HashSet<Chunk> chunks = Peer.getStorage().getStoredChunks();
+        ArrayList<Chunk> chunks = Peer.getStorage().getStoredChunks();
 
-        int i = 0;
         long tempSpace = spaceUsed - spaceClaimed;
+
+        System.out.println(tempSpace);
 
         Iterator iter = chunks.iterator();
 
@@ -343,9 +344,9 @@ public class Peer implements RMI {
 
             Peer.getMessageForwarder().sendRemoved(chunk.getChunkNr(), chunk.getFileID());
 
-            iter.remove();
-
             tempSpace -= chunk.getData().length;
+
+            iter.remove();
 
             String fileName = Peer.getPeerFolder().getAbsolutePath() + "/backup/" + chunk.getFileID() + "/chk" + chunk.getChunkNr();
             File file = new File(fileName);
@@ -355,11 +356,15 @@ public class Peer implements RMI {
             File folder = new File(folderName);
             folder.delete();
 
-            i++;
+        } while (tempSpace > 0);
 
-        } while (tempSpace > 0 && i < chunks.size());
+        long totalSpaceOccupied = 0;
 
-        Peer.getStorage().reclaimSpace(spaceClaimed, 1);
+        for (Chunk chunk : chunks) {
+            totalSpaceOccupied += chunk.getData().length;
+        }
+
+        Peer.getStorage().reclaimSpace(spaceClaimed, totalSpaceOccupied);
 
     }
 
