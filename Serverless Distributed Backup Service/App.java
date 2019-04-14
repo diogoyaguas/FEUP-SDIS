@@ -25,8 +25,6 @@ public class App {
 
         try {
 
-            File file = FileData.createFolder("Files");
-
             if (!initializeArgs(args)) return;
 
             Registry registry = LocateRegistry.getRegistry("localhost");

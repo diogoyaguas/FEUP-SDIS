@@ -87,6 +87,7 @@ public class Peer implements RMI {
     private Peer() {
         peerID = count.incrementAndGet();
 
+        File file = FileData.createFolder("Files");
         peerFolder = FileData.createFolder("Files/" + peerAp);
 
         exec = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(250);
