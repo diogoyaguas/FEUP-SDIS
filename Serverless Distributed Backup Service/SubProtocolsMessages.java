@@ -191,13 +191,13 @@ class SubProtocolsMessages {
      * @param repDegree
      * @param Body
      */
-    static void chunk(String fileID, int ChunkNo, int repDegree, byte[] Body) {
+    static void chunk(String fileID, int ChunkNo, byte[] Body) {
 
         //CHUNK <Version> <SenderId> <fileID> <ChunkNo> <CRLF><CRLF><Body>
 
         System.out.println("\nCHUNK received\t");
 
-        Chunk chunk = new Chunk(ChunkNo, fileID, Body, repDegree);
+        Chunk chunk = new Chunk(ChunkNo, fileID, Body, 0);
 
         if (Peer.getMDR().restoring(fileID)) {
             Peer.getMDR().save(fileID, chunk);

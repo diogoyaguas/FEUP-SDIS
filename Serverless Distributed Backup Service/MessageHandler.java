@@ -61,8 +61,7 @@ public class MessageHandler implements Runnable {
 
             case "CHUNK":
                 chunkNr = Integer.parseInt(parsedHeader[4]);
-                repDegree = Integer.parseInt(parsedHeader[5]);
-                SubProtocolsMessages.chunk(fileId, chunkNr, repDegree, body);
+                SubProtocolsMessages.chunk(fileId, chunkNr, body);
                 break;
 
             case "REMOVED":
@@ -118,6 +117,10 @@ public class MessageHandler implements Runnable {
         }
 
         int bodyIndex = header.length() + 2 * MessageForwarder.CRLF.length();
+
+        if(bodyIndex > packet.getLength()) {
+            bodyIndex = packet.getLength();
+        }
 
         body = Arrays.copyOfRange(packet.getData(), bodyIndex, packet.getLength());
 
