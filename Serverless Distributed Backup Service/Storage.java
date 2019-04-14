@@ -61,6 +61,11 @@ class Storage implements java.io.Serializable {
         return files;
     }
 
+    File getFile(String fileID) {
+
+        return  files.get(fileID);
+    }
+
     HashMap<String, Integer> getDesiredReplicationDegree() {
 
         return desiredReplicationDegree;
@@ -248,6 +253,21 @@ class Storage implements java.io.Serializable {
     private synchronized void deleteReps(String fileID, int ChunkNr) {
 
         this.storedReps.remove(fileID + '_' + ChunkNr);
+    }
+
+    /**
+     * Delete stored chunk files
+     *
+     * @param chunk Chunk
+     */
+    void deleteChunkFiles(Chunk chunk) {
+        String fileName = Peer.getPeerFolder().getAbsolutePath() + "/backup/" + chunk.getFileID() + "/chk" + chunk.getChunkNr();
+        File file = new File(fileName);
+        file.delete();
+
+        String folderName = Peer.getPeerFolder().getAbsolutePath() + "/backup/" + chunk.getFileID();
+        File folder = new File(folderName);
+        folder.delete();
     }
 
     /**

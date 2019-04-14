@@ -35,7 +35,11 @@ class ChannelBackup extends ChannelControl {
      * @param chunkID Chunk's ID
      */
     synchronized int getNumBackups(String chunkID) {
-        return backup.get(chunkID).size();
+
+        if(backup.get(chunkID) != null) {
+            return backup.get(chunkID).size();
+        }
+        return 0;
     }
 
     /**

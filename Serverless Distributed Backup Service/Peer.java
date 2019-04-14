@@ -433,6 +433,11 @@ public class Peer implements RMI {
 
         ArrayList<Chunk> chunks = Peer.getStorage().getStoredChunks();
 
+        if(chunks.isEmpty()) {
+            System.out.println("Impossible to reclaim space.");
+            return;
+        }
+
         long tempSpace = spaceUsed - spaceClaimed;
 
         System.out.println(tempSpace);
@@ -448,13 +453,7 @@ public class Peer implements RMI {
 
             iter.remove();
 
-            String fileName = Peer.getPeerFolder().getAbsolutePath() + "/backup/" + chunk.getFileID() + "/chk" + chunk.getChunkNr();
-            File file = new File(fileName);
-            file.delete();
-
-            String folderName = Peer.getPeerFolder().getAbsolutePath() + "/backup/" + chunk.getFileID();
-            File folder = new File(folderName);
-            folder.delete();
+            getStorage().deleteChunkFiles(chunk);
 
         } while (tempSpace > 0);
 
@@ -462,6 +461,15 @@ public class Peer implements RMI {
 
         for (Chunk chunk : chunks) {
             totalSpaceOccupied += chunk.getData().length;
+        }
+
+        if(totalSpaceOccupied == 0) {
+
+            for(Chunk chunk: chunks) {
+                getStorage().deleteChunkFiles(chunk);
+            }
+
+            chunks.clear();
         }
 
         Peer.getStorage().reclaimSpace(spaceClaimed, totalSpaceOccupied);
